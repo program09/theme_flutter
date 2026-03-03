@@ -60,6 +60,7 @@ class _MainAppState extends State<MainApp> {
                       ),
 
                       TextFormField(
+                        enabled: false,
                         decoration: const InputDecoration(
                           labelText: 'Label',
                           hintText: 'Hint',

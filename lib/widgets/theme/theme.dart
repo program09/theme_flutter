@@ -142,15 +142,31 @@ class AppTheme {
     inputDecorationTheme: const InputDecorationTheme(
       filled: true,
       fillColor: AppColorsLight.surfaceVariant,
-      border: OutlineInputBorder(),
+      floatingLabelBehavior: FloatingLabelBehavior.always,
+      labelStyle: TextStyle(fontWeight: FontWeight.w500),
+      hintStyle: TextStyle(
+        fontWeight: FontWeight.w500,
+        color: AppColorsLight.placeholder,
+      ),
       enabledBorder: OutlineInputBorder(
         borderSide: BorderSide(color: AppColorsLight.outline),
+        borderRadius: BorderRadius.all(Radius.circular(15)),
+      ),
+      disabledBorder: OutlineInputBorder(
+        borderSide: BorderSide(color: AppColorsLight.outline),
+        borderRadius: BorderRadius.all(Radius.circular(15)),
       ),
       focusedBorder: OutlineInputBorder(
         borderSide: BorderSide(color: AppGeneralColors.primary, width: 2),
+        borderRadius: BorderRadius.all(Radius.circular(15)),
       ),
       errorBorder: OutlineInputBorder(
         borderSide: BorderSide(color: AppColorsLight.error),
+        borderRadius: BorderRadius.all(Radius.circular(15)),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderSide: BorderSide(color: AppColorsLight.error, width: 2),
+        borderRadius: BorderRadius.all(Radius.circular(15)),
       ),
     ),
 
@@ -344,15 +360,31 @@ class AppTheme {
     inputDecorationTheme: const InputDecorationTheme(
       filled: false,
       fillColor: AppColorsDark.surfaceVariant,
-      border: OutlineInputBorder(),
+      floatingLabelBehavior: FloatingLabelBehavior.always,
+      labelStyle: TextStyle(fontWeight: FontWeight.w500),
+      hintStyle: TextStyle(
+        fontWeight: FontWeight.w500,
+        color: AppColorsDark.outline,
+      ),
       enabledBorder: OutlineInputBorder(
         borderSide: BorderSide(color: AppColorsDark.outline),
+        borderRadius: BorderRadius.all(Radius.circular(15)),
+      ),
+      disabledBorder: OutlineInputBorder(
+        borderSide: BorderSide(color: AppColorsDark.outline),
+        borderRadius: BorderRadius.all(Radius.circular(15)),
       ),
       focusedBorder: OutlineInputBorder(
         borderSide: BorderSide(color: AppGeneralColors.primary, width: 2),
+        borderRadius: BorderRadius.all(Radius.circular(15)),
       ),
       errorBorder: OutlineInputBorder(
         borderSide: BorderSide(color: AppColorsDark.error),
+        borderRadius: BorderRadius.all(Radius.circular(15)),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderSide: BorderSide(color: AppColorsDark.error, width: 2),
+        borderRadius: BorderRadius.all(Radius.circular(15)),
       ),
     ),
 
