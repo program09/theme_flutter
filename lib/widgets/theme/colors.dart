@@ -80,7 +80,7 @@ class AppColorsDark {
   static const onTertiary = Color(0xFF1E1B4B);
 
   // BACKGROUND & SURFACE
-  static const background = Color(0xFF0F172A);
+  static const background = Color.fromARGB(255, 17, 26, 47);
   static const onBackground = Color(0xFFFFFFFF);
 
   static const surface = Color(0xFF1E293B);
