@@ -131,6 +131,8 @@ class AppTheme {
       style: IconButton.styleFrom(foregroundColor: AppColorsLight.iconPrimary),
     ),
 
+    iconTheme: const IconThemeData(color: AppColorsLight.iconPrimary),
+
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
       backgroundColor: AppGeneralColors.primary,
       foregroundColor: AppGeneralColors.onPrimary,
@@ -149,23 +151,23 @@ class AppTheme {
         color: AppColorsLight.placeholder,
       ),
       enabledBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: AppColorsLight.outline),
+        borderSide: BorderSide(color: AppColorsLight.outline, width: 1.5),
         borderRadius: BorderRadius.all(Radius.circular(15)),
       ),
       disabledBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: AppColorsLight.outline),
+        borderSide: BorderSide(color: AppColorsLight.outline, width: 1.5),
         borderRadius: BorderRadius.all(Radius.circular(15)),
       ),
       focusedBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: AppGeneralColors.primary, width: 2),
+        borderSide: BorderSide(color: AppGeneralColors.primary, width: 1.5),
         borderRadius: BorderRadius.all(Radius.circular(15)),
       ),
       errorBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: AppColorsLight.error),
+        borderSide: BorderSide(color: AppColorsLight.error, width: 1.5),
         borderRadius: BorderRadius.all(Radius.circular(15)),
       ),
       focusedErrorBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: AppColorsLight.error, width: 2),
+        borderSide: BorderSide(color: AppColorsLight.error, width: 1.5),
         borderRadius: BorderRadius.all(Radius.circular(15)),
       ),
     ),
@@ -219,6 +221,30 @@ class AppTheme {
     listTileTheme: const ListTileThemeData(
       iconColor: AppColorsLight.iconSecondary,
       textColor: AppColorsLight.textPrimary,
+    ),
+
+    dropdownMenuTheme: const DropdownMenuThemeData(
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: AppColorsLight.surfaceVariant,
+        floatingLabelBehavior: FloatingLabelBehavior.always,
+        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        labelStyle: TextStyle(
+          fontWeight: FontWeight.w500,
+          color: AppColorsLight.textPrimary,
+        ),
+        hintStyle: TextStyle(
+          fontWeight: FontWeight.w500,
+          color: AppColorsLight.placeholder,
+        ),
+      ),
+      menuStyle: MenuStyle(
+        shape: WidgetStatePropertyAll(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(20)),
+          ),
+        ),
+      ),
     ),
   );
 
@@ -346,8 +372,10 @@ class AppTheme {
     ),
 
     iconButtonTheme: IconButtonThemeData(
-      style: IconButton.styleFrom(foregroundColor: AppColorsLight.iconPrimary),
+      style: IconButton.styleFrom(foregroundColor: AppColorsDark.iconPrimary),
     ),
+
+    iconTheme: const IconThemeData(color: AppColorsDark.iconPrimary),
 
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
       backgroundColor: AppGeneralColors.primary,
@@ -367,23 +395,23 @@ class AppTheme {
         color: AppColorsDark.outline,
       ),
       enabledBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: AppColorsDark.outline),
+        borderSide: BorderSide(color: AppColorsDark.outline, width: 1.5),
         borderRadius: BorderRadius.all(Radius.circular(15)),
       ),
       disabledBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: AppColorsDark.outline),
+        borderSide: BorderSide(color: AppColorsDark.outline, width: 1.5),
         borderRadius: BorderRadius.all(Radius.circular(15)),
       ),
       focusedBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: AppGeneralColors.primary, width: 2),
+        borderSide: BorderSide(color: AppGeneralColors.primary, width: 1.5),
         borderRadius: BorderRadius.all(Radius.circular(15)),
       ),
       errorBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: AppColorsDark.error),
+        borderSide: BorderSide(color: AppColorsDark.error, width: 1.5),
         borderRadius: BorderRadius.all(Radius.circular(15)),
       ),
       focusedErrorBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: AppColorsDark.error, width: 2),
+        borderSide: BorderSide(color: AppColorsDark.error, width: 1.5),
         borderRadius: BorderRadius.all(Radius.circular(15)),
       ),
     ),
@@ -419,24 +447,48 @@ class AppTheme {
     ),
 
     snackBarTheme: const SnackBarThemeData(
-      backgroundColor: AppColorsLight.surface,
-      contentTextStyle: TextStyle(color: AppColorsLight.textPrimary),
+      backgroundColor: AppColorsDark.surface,
+      contentTextStyle: TextStyle(color: AppColorsDark.textPrimary),
     ),
 
     tooltipTheme: const TooltipThemeData(
-      decoration: BoxDecoration(color: AppColorsLight.surfaceVariant),
+      decoration: BoxDecoration(color: AppColorsDark.surfaceVariant),
       textStyle: TextStyle(color: Colors.white),
     ),
 
     chipTheme: const ChipThemeData(
-      backgroundColor: AppColorsLight.surfaceVariant,
+      backgroundColor: AppColorsDark.surfaceVariant,
       selectedColor: AppGeneralColors.primary,
-      labelStyle: TextStyle(color: AppColorsLight.textPrimary),
+      labelStyle: TextStyle(color: AppColorsDark.textPrimary),
     ),
 
     listTileTheme: const ListTileThemeData(
-      iconColor: AppColorsLight.iconSecondary,
-      textColor: AppColorsLight.textPrimary,
+      iconColor: AppColorsDark.iconSecondary,
+      textColor: AppColorsDark.textPrimary,
+    ),
+
+    dropdownMenuTheme: const DropdownMenuThemeData(
+      inputDecorationTheme: InputDecorationTheme(
+        filled: false,
+        fillColor: AppColorsDark.surfaceVariant,
+        floatingLabelBehavior: FloatingLabelBehavior.always,
+        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        labelStyle: TextStyle(
+          fontWeight: FontWeight.w500,
+          color: AppColorsDark.textPrimary,
+        ),
+        hintStyle: TextStyle(
+          fontWeight: FontWeight.w500,
+          color: AppColorsDark.outline,
+        ),
+      ),
+      menuStyle: MenuStyle(
+        shape: WidgetStatePropertyAll(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(20)),
+          ),
+        ),
+      ),
     ),
   );
 }
