@@ -4,6 +4,7 @@ import 'package:ui/widgets/forms/input_autocomplete.dart';
 import 'package:ui/widgets/forms/select.dart';
 import 'package:ui/widgets/forms/options.dart';
 import 'package:ui/widgets/forms/switch.dart';
+import 'package:ui/widgets/layouts/tabs.dart';
 import 'package:ui/widgets/theme/theme.dart';
 
 void main() {
@@ -36,12 +37,100 @@ class _MainAppState extends State<MainApp> {
             children: [
               switchUI(
                 value: _value,
-                onChanged: (value) {
+                onChecked: (value) {
                   setState(() {
                     _value = value;
                   });
                 },
               ),
+              const SizedBox(height: 20),
+
+              SizedBox(
+                height: 400,
+                child: TabsUI(
+                  position: PositionTab.bottom,
+                  alignment: AlignmentTab.start,
+                  hiddenTabs: [
+                    'oculto',
+                    'oculto2',
+                    'oculto3',
+                    'oculto4',
+                    'oculto5',
+                  ],
+                  tabs: [
+                    TabItem(
+                      id: 'general',
+                      label: 'General',
+                      icon: Icons.settings,
+                      badge: 5,
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text('Configuraciones Generales'),
+                            const SizedBox(height: 10),
+                            switchUI(
+                              value: _value,
+                              onChecked: (v) => setState(() => _value = v),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    TabItem(
+                      id: 'perfil',
+                      label: 'Perfil',
+                      icon: Icons.person,
+                      showTab: false,
+                      badge: 5,
+                      child: const Center(child: Text('Datos del Perfil')),
+                    ),
+                    TabItem(
+                      id: 'oculto',
+                      label: 'Oculto',
+                      icon: Icons.visibility_off,
+                      showTab: true,
+                      child: const Center(child: Text('Este no se ve')),
+                    ),
+                    TabItem(
+                      id: 'oculto2',
+                      label: 'Oculto',
+                      icon: Icons.visibility_off,
+                      showTab: true,
+                      child: const Center(child: Text('Este no se ve')),
+                    ),
+                    TabItem(
+                      id: 'oculto3',
+                      label: 'Oculto',
+                      icon: Icons.visibility_off,
+                      showTab: true,
+                      child: const Center(child: Text('Este no se ve')),
+                    ),
+                    TabItem(
+                      id: 'oculto4',
+                      label: 'Oculto',
+                      icon: Icons.visibility_off,
+                      showTab: true,
+                      child: const Center(child: Text('Este no se ve')),
+                    ),
+                    TabItem(
+                      id: 'oculto5',
+                      label: 'Oculto',
+                      icon: Icons.visibility_off,
+                      showTab: true,
+                      child: const Center(child: Text('Este no se ve')),
+                    ),
+
+                    TabItem(
+                      id: 'ayuda',
+                      label: 'Ayuda',
+                      icon: Icons.help_outline,
+                      child: Center(child: Text('Sección de Ayuda')),
+                    ),
+                  ],
+                ),
+              ),
+
               const SizedBox(height: 20),
 
               Card(
@@ -57,7 +146,7 @@ class _MainAppState extends State<MainApp> {
                       children: [
                         switchUI(
                           value: _value,
-                          onChanged: (value) {
+                          onChecked: (value) {
                             setState(() {
                               _value = value;
                             });
