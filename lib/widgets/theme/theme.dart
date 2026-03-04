@@ -187,7 +187,23 @@ class AppTheme {
       trackOutlineColor: WidgetStateProperty.all(AppColorsLight.outline),
       trackOutlineWidth: WidgetStateProperty.all(2),
       trackColor: WidgetStateProperty.all(AppColorsLight.surfaceVariant),
-      thumbColor: WidgetStateProperty.all(AppGeneralColors.primary),
+      thumbColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return AppGeneralColors.primary;
+        }
+        return AppColorsLight.outline;
+      }),
+
+      thumbIcon: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return const Icon(
+            Icons.check,
+            size: 16,
+            color: AppColorsLight.outline,
+          );
+        }
+        return const Icon(Icons.close, size: 16);
+      }),
     ),
 
     sliderTheme: const SliderThemeData(
@@ -430,8 +446,24 @@ class AppTheme {
     switchTheme: SwitchThemeData(
       trackOutlineColor: WidgetStateProperty.all(AppColorsDark.outline),
       trackOutlineWidth: WidgetStateProperty.all(2),
-      trackColor: WidgetStateProperty.all(AppColorsDark.surfaceVariant),
-      thumbColor: WidgetStateProperty.all(AppGeneralColors.primary),
+      trackColor: WidgetStateProperty.all(AppColorsDark.surface),
+      thumbColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return AppGeneralColors.primary;
+        }
+        return AppColorsDark.outline;
+      }),
+
+      thumbIcon: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return const Icon(
+            Icons.check,
+            size: 16,
+            color: AppColorsDark.iconSecondary,
+          );
+        }
+        return const Icon(Icons.close, size: 16);
+      }),
     ),
 
     sliderTheme: const SliderThemeData(
