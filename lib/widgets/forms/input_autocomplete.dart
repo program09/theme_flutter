@@ -62,78 +62,129 @@ class _InputAutocompleteUIState extends State<InputAutocompleteUI> {
 
   @override
   Widget build(BuildContext context) {
-    return Autocomplete<Option>(
-      displayStringForOption: (Option option) => option.label,
-      optionsBuilder:
-          widget.optionsBuilder ??
-          (TextEditingValue textEditingValue) {
-            if (textEditingValue.text.isEmpty) {
-              return const Iterable<Option>.empty();
-            }
-            return (widget.options ?? []).where((Option option) {
-              return option.label.toLowerCase().contains(
-                textEditingValue.text.toLowerCase(),
-              );
-            });
-          },
-      onSelected: widget.onSelected,
-      fieldViewBuilder:
-          (context, textEditingController, focusNode, onFieldSubmitted) {
-            return TextFormField(
-              controller: textEditingController,
-              focusNode: focusNode,
-              enabled: !widget.disabled,
-              decoration: InputDecoration(
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 18,
-                ),
-                labelText: widget.label,
-                labelStyle: const TextStyle(fontWeight: FontWeight.w500),
-                hintText: widget.type == Type.password
-                    ? '••••••••'
-                    : widget.hintText,
-                errorText: widget.errorText,
-                prefixIcon: widget.prefixIcon != null
-                    ? Icon(widget.prefixIcon)
-                    : null,
-                suffixIcon: icon(),
-              ),
-              keyboardType: widget.type,
-              obscureText: widget.type == Type.password && !isPasswordVisible,
-              maxLines: widget.type == Type.multiline ? 3 : 1,
-              onChanged: widget.onChanged,
-              validator: widget.validator,
-              onFieldSubmitted: (value) {
-                onFieldSubmitted();
-                if (widget.onSubmitted != null) {
-                  widget.onSubmitted!(value);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Autocomplete<Option>(
+          displayStringForOption: (Option option) => option.label,
+          optionsBuilder:
+              widget.optionsBuilder ??
+              (TextEditingValue textEditingValue) {
+                if (textEditingValue.text.isEmpty) {
+                  return const Iterable<Option>.empty();
                 }
+
+                final options = (widget.options ?? []).where((Option option) {
+                  return option.label.toLowerCase().contains(
+                    textEditingValue.text.toLowerCase(),
+                  );
+                });
+
+                if (options.length == 1 &&
+                    options.first.label == textEditingValue.text) {
+                  return const Iterable<Option>.empty();
+                }
+
+                return options;
               },
+          onSelected: (Option option) {
+            widget.controller.text = option.label;
+            FocusScope.of(context).unfocus();
+            if (widget.onSelected != null) {
+              widget.onSelected!(option);
+            }
+          },
+          fieldViewBuilder:
+              (context, textEditingController, focusNode, onFieldSubmitted) {
+                // Sincronizar controladores si es necesario
+                if (widget.controller.text != textEditingController.text &&
+                    widget.controller.text.isNotEmpty) {
+                  textEditingController.text = widget.controller.text;
+                }
+
+                return TextFormField(
+                  controller: textEditingController,
+                  focusNode: focusNode,
+                  enabled: !widget.disabled,
+                  decoration: InputDecoration(
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 18,
+                    ),
+                    labelText: widget.label,
+                    labelStyle: const TextStyle(fontWeight: FontWeight.w500),
+                    hintText: widget.type == Type.password
+                        ? '••••••••'
+                        : widget.hintText,
+                    errorText: widget.errorText,
+                    prefixIcon: widget.prefixIcon != null
+                        ? Icon(widget.prefixIcon)
+                        : null,
+                    suffixIcon: icon(),
+                  ),
+                  keyboardType: widget.type,
+                  obscureText:
+                      widget.type == Type.password && !isPasswordVisible,
+                  maxLines: widget.type == Type.multiline ? 3 : 1,
+                  onChanged: (value) {
+                    widget.controller.text = value;
+                    if (widget.onChanged != null) {
+                      widget.onChanged!(value);
+                    }
+                  },
+                  validator: widget.validator,
+                  onFieldSubmitted: (value) {
+                    onFieldSubmitted();
+                    if (widget.onSubmitted != null) {
+                      widget.onSubmitted!(value);
+                    }
+                  },
+                );
+              },
+          optionsViewBuilder: (context, onSelected, options) {
+            return Align(
+              alignment: Alignment.topLeft,
+              child: Material(
+                elevation: 8.0,
+                shadowColor: Colors.black.withValues(alpha: 0.4),
+                borderRadius: BorderRadius.circular(20),
+                color: Theme.of(context).cardColor,
+                child: Container(
+                  width: constraints.maxWidth,
+                  constraints: const BoxConstraints(maxHeight: 250),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: Scrollbar(
+                    thumbVisibility: true,
+                    child: ListView.builder(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      shrinkWrap: true,
+                      itemCount: options.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        final Option option = options.elementAt(index);
+                        return InkWell(
+                          onTap: () => onSelected(option),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
+                            child: Text(
+                              option.label,
+                              style: Theme.of(
+                                context,
+                              ).textTheme.bodyLarge?.copyWith(fontSize: 14),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
             );
           },
-      optionsViewBuilder: (context, onSelected, options) {
-        return Align(
-          alignment: Alignment.topLeft,
-          child: Material(
-            elevation: 4.0,
-            borderRadius: BorderRadius.circular(15),
-            child: SizedBox(
-              width: MediaQuery.of(context).size.width - 64,
-              child: ListView.builder(
-                padding: EdgeInsets.zero,
-                shrinkWrap: true,
-                itemCount: options.length,
-                itemBuilder: (BuildContext context, int index) {
-                  final Option option = options.elementAt(index);
-                  return ListTile(
-                    title: Text(option.label),
-                    onTap: () => onSelected(option),
-                  );
-                },
-              ),
-            ),
-          ),
         );
       },
     );

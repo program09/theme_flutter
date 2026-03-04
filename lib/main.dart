@@ -117,10 +117,20 @@ class _MainAppState extends State<MainApp> {
                             Option(value: '1', label: 'Option 1'),
                             Option(value: '2', label: 'Option 2'),
                             Option(value: '3', label: 'Option 3'),
+                            Option(value: '4', label: 'Option 4'),
+                            Option(value: '5', label: 'Option 5'),
+                            Option(value: '6', label: 'Option 6'),
+                            Option(value: '7', label: 'Option 7'),
+                            Option(value: '8', label: 'Option 8'),
+                            Option(value: '9', label: 'Option 9'),
+                            Option(value: '10', label: 'Option 10'),
                           ],
                           prefixIcon: Icons.search,
                           onSelected: (value) {
                             print('Selected: $value');
+                          },
+                          onChanged: (value) {
+                            print('Changed: $value');
                           },
                         ),
 

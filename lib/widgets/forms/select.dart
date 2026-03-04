@@ -49,8 +49,12 @@ class SelectUI extends StatelessWidget {
           initialSelection: getOption(),
           width: constraints.maxWidth,
           menuHeight: 250,
-          menuStyle: const MenuStyle(
-            shape: WidgetStatePropertyAll(
+          menuStyle: MenuStyle(
+            elevation: const WidgetStatePropertyAll(8.0),
+            shadowColor: WidgetStatePropertyAll(
+              Colors.black.withValues(alpha: 0.4),
+            ),
+            shape: const WidgetStatePropertyAll(
               RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(20)),
               ),
