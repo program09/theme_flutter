@@ -15,6 +15,37 @@ class _ExampleState extends State<Example> {
   final GlobalKey<ProfileExampleState> profileKey =
       GlobalKey<ProfileExampleState>();
   final GlobalKey<TabsUIState> tabsKey = GlobalKey<TabsUIState>();
+  late List<TabItem> _tabs;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabs = [
+      TabItem(
+        id: 'general',
+        label: 'General',
+        icon: Icons.settings,
+        child: FormsExample(
+          key: formsKey,
+          keytab: tabsKey,
+          tabId: 'general',
+          data: const {'name': 'General'},
+        ),
+      ),
+      TabItem(
+        id: 'perfil',
+        label: 'Perfil',
+        icon: Icons.person,
+        child: ProfileExample(
+          key: profileKey,
+          keytab: tabsKey,
+          tabId: 'perfil',
+          data: const {'name': 'Perfil'},
+        ),
+        badge: 1,
+      ),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -65,31 +96,7 @@ class _ExampleState extends State<Example> {
           onTap: (tab) async {
             print('Tab: ${tab.id}');
           },
-          tabs: [
-            TabItem(
-              id: 'general',
-              label: 'General',
-              icon: Icons.settings,
-              child: FormsExample(
-                key: formsKey,
-                keytab: tabsKey,
-                tabId: 'general',
-                data: const {'name': 'General'},
-              ),
-            ),
-            TabItem(
-              id: 'perfil',
-              label: 'Perfil',
-              icon: Icons.person,
-              child: ProfileExample(
-                key: profileKey,
-                keytab: tabsKey,
-                tabId: 'perfil',
-                data: const {'name': 'Perfil'},
-              ),
-              badge: 1,
-            ),
-          ],
+          tabs: _tabs,
         ),
       ),
     );
