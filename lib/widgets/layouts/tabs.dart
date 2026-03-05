@@ -30,6 +30,7 @@ class TabsUI extends StatefulWidget {
   final Color? activeColor;
   final Color? inactiveColor;
   final List<String> hiddenTabs;
+  final Function(TabItem)? onTap;
 
   const TabsUI({
     super.key,
@@ -39,29 +40,57 @@ class TabsUI extends StatefulWidget {
     this.activeColor,
     this.inactiveColor,
     this.hiddenTabs = const [],
+    this.onTap,
   });
 
   @override
-  State<TabsUI> createState() => _TabsUIState();
+  State<TabsUI> createState() => TabsUIState();
 }
 
-class _TabsUIState extends State<TabsUI> with SingleTickerProviderStateMixin {
+class TabsUIState extends State<TabsUI> with SingleTickerProviderStateMixin {
   late PageController _pageController;
   int _currentIndex = 0;
   late List<TabItem> _visibleTabs;
   late List<GlobalKey> _tabKeys;
+
+  // Mapa para gestionar badges de forma dinámica
+  final Map<String, int?> _badges = {};
 
   @override
   void initState() {
     super.initState();
     _updateVisibleTabs();
     _pageController = PageController(initialPage: _currentIndex);
+
+    // Inicializar badges desde los TabItems
+    for (var tab in widget.tabs) {
+      _badges[tab.id] = tab.badge;
+    }
   }
 
   @override
   void didUpdateWidget(TabsUI oldWidget) {
     super.didUpdateWidget(oldWidget);
     _updateVisibleTabs();
+
+    // Sincronizar badges si cambian los tabs desde el padre
+    for (var tab in widget.tabs) {
+      if (!_badges.containsKey(tab.id) ||
+          tab.badge !=
+              oldWidget.tabs
+                  .firstWhere((t) => t.id == tab.id, orElse: () => tab)
+                  .badge) {
+        _badges[tab.id] = tab.badge;
+      }
+    }
+  }
+
+  void setBadge(String tabId, int? count) {
+    if (mounted) {
+      setState(() {
+        _badges[tabId] = count;
+      });
+    }
   }
 
   void _updateVisibleTabs() {
@@ -103,6 +132,7 @@ class _TabsUIState extends State<TabsUI> with SingleTickerProviderStateMixin {
       curve: Curves.easeInOutCubic,
     );
     _scrollToTab(index);
+    widget.onTap?.call(_visibleTabs[index]);
   }
 
   Widget _buildTabBar(BoxConstraints constraints) {
@@ -122,7 +152,23 @@ class _TabsUIState extends State<TabsUI> with SingleTickerProviderStateMixin {
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        border: widget.position == PositionTab.top
+            ? Border(
+                bottom: BorderSide(
+                  width: 0.5,
+                  color: Theme.of(context).colorScheme.outline,
+                ),
+              )
+            : Border(
+                top: BorderSide(
+                  width: 0.5,
+                  color: Theme.of(context).colorScheme.outline,
+                ),
+              ),
+      ),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: ConstrainedBox(
@@ -133,44 +179,41 @@ class _TabsUIState extends State<TabsUI> with SingleTickerProviderStateMixin {
               final tab = _visibleTabs[index];
               final isSelected = _currentIndex == index;
               final theme = Theme.of(context);
+              final currentBadge = _badges[tab.id];
 
               return Padding(
                 key: _tabKeys[index],
                 padding: const EdgeInsets.symmetric(horizontal: 4),
                 child: Badge(
-                  label: tab.badge != null ? Text(tab.badge.toString()) : null,
-                  isLabelVisible: tab.badge != null,
-                  backgroundColor: theme.colorScheme.secondary,
+                  label: currentBadge != null
+                      ? Text(currentBadge.toString())
+                      : null,
+                  isLabelVisible: currentBadge != null,
+                  backgroundColor: theme.colorScheme.error,
                   textColor: theme.colorScheme.onPrimary,
                   alignment: const Alignment(0.9, -0.9),
                   child: InkWell(
                     onTap: () => _onTabTapped(index),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(30),
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 250),
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
+                        horizontal: 14,
                         vertical: 10,
                       ),
                       decoration: BoxDecoration(
                         color: isSelected
                             ? (widget.activeColor ?? theme.colorScheme.primary)
                             : (widget.inactiveColor ??
-                                  theme.colorScheme.surfaceContainerHighest
-                                      .withOpacity(0.3)),
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: isSelected
-                            ? [
-                                BoxShadow(
-                                  color:
-                                      (widget.activeColor ??
-                                              theme.colorScheme.primary)
-                                          .withOpacity(0.3),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ]
-                            : null,
+                                  theme.colorScheme.surface.withValues(
+                                    alpha: 0,
+                                  )),
+                        borderRadius: BorderRadius.circular(30),
+                        border: Border.all(
+                          color: isSelected
+                              ? theme.colorScheme.primary
+                              : theme.colorScheme.outline,
+                        ),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -189,9 +232,7 @@ class _TabsUIState extends State<TabsUI> with SingleTickerProviderStateMixin {
                             tab.label,
                             style: TextStyle(
                               fontSize: 14,
-                              fontWeight: isSelected
-                                  ? FontWeight.bold
-                                  : FontWeight.w500,
+                              fontWeight: FontWeight.w500,
                               color: isSelected
                                   ? theme.colorScheme.onPrimary
                                   : theme.colorScheme.onSurfaceVariant,
@@ -227,7 +268,9 @@ class _TabsUIState extends State<TabsUI> with SingleTickerProviderStateMixin {
               _scrollToTab(index);
             },
             physics: const BouncingScrollPhysics(),
-            children: _visibleTabs.map((tab) => tab.child).toList(),
+            children: _visibleTabs
+                .map((tab) => _KeepAliveWrapper(child: tab.child))
+                .toList(),
           ),
         );
 
@@ -244,5 +287,25 @@ class _TabsUIState extends State<TabsUI> with SingleTickerProviderStateMixin {
         );
       },
     );
+  }
+}
+
+class _KeepAliveWrapper extends StatefulWidget {
+  final Widget child;
+  const _KeepAliveWrapper({required this.child});
+
+  @override
+  State<_KeepAliveWrapper> createState() => _KeepAliveWrapperState();
+}
+
+class _KeepAliveWrapperState extends State<_KeepAliveWrapper>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return widget.child;
   }
 }

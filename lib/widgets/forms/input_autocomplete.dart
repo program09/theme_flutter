@@ -14,9 +14,10 @@ class InputAutocompleteUI extends StatefulWidget {
   final List<Option>? options;
   final AutocompleteOptionsBuilder<Option>? optionsBuilder;
   final void Function(Option)? onSelected;
-  final String? Function(String?)? onChanged;
+  final void Function(String?)? onChanged;
   final String? Function(String?)? validator;
-  final String? Function(String?)? onSubmitted;
+  final void Function(String?)? onSubmitted;
+  final bool autovalidate;
 
   const InputAutocompleteUI({
     super.key,
@@ -34,6 +35,7 @@ class InputAutocompleteUI extends StatefulWidget {
     this.onChanged,
     this.validator,
     this.onSubmitted,
+    this.autovalidate = false,
   });
 
   @override
@@ -101,43 +103,29 @@ class _InputAutocompleteUIState extends State<InputAutocompleteUI> {
                   textEditingController.text = widget.controller.text;
                 }
 
-                return TextFormField(
+                return InputUI(
+                  label: widget.label,
+                  hintText: widget.hintText,
                   controller: textEditingController,
-                  focusNode: focusNode,
-                  enabled: !widget.disabled,
-                  decoration: InputDecoration(
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 18,
-                    ),
-                    labelText: widget.label,
-                    labelStyle: const TextStyle(fontWeight: FontWeight.w500),
-                    hintText: widget.type == Type.password
-                        ? '••••••••'
-                        : widget.hintText,
-                    errorText: widget.errorText,
-                    prefixIcon: widget.prefixIcon != null
-                        ? Icon(widget.prefixIcon)
-                        : null,
-                    suffixIcon: icon(),
-                  ),
-                  keyboardType: widget.type,
-                  obscureText:
-                      widget.type == Type.password && !isPasswordVisible,
-                  maxLines: widget.type == Type.multiline ? 3 : 1,
+                  type: widget.type,
+                  errorText: widget.errorText,
+                  prefixIcon: widget.prefixIcon,
+                  suffixIcon: widget.suffixIcon,
                   onChanged: (value) {
-                    widget.controller.text = value;
+                    widget.controller.text = value!;
                     if (widget.onChanged != null) {
                       widget.onChanged!(value);
                     }
                   },
                   validator: widget.validator,
-                  onFieldSubmitted: (value) {
+                  focusNode: focusNode,
+                  onSubmitted: (value) {
                     onFieldSubmitted();
                     if (widget.onSubmitted != null) {
                       widget.onSubmitted!(value);
                     }
                   },
+                  autovalidate: widget.autovalidate,
                 );
               },
           optionsViewBuilder: (context, onSelected, options) {

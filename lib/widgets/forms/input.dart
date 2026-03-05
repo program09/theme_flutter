@@ -24,9 +24,11 @@ class InputUI extends StatefulWidget {
   final TextInputType type;
   final IconData? prefixIcon;
   final IconData? suffixIcon;
-  final String? Function(String?)? onChanged;
+  final void Function(String?)? onChanged;
   final String? Function(String?)? validator;
-  final String? Function(String?)? onSubmitted;
+  final void Function(String?)? onSubmitted;
+  final bool autovalidate;
+  final FocusNode? focusNode;
   const InputUI({
     super.key,
     required this.label,
@@ -40,6 +42,8 @@ class InputUI extends StatefulWidget {
     this.onChanged,
     this.validator,
     this.onSubmitted,
+    this.autovalidate = false,
+    this.focusNode,
   });
 
   @override
@@ -69,6 +73,10 @@ class _InputUIState extends State<InputUI> {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      focusNode: widget.focusNode,
+      autovalidateMode: widget.autovalidate
+          ? AutovalidateMode.always
+          : AutovalidateMode.disabled,
       controller: widget.controller,
       enabled: !widget.disabled,
       decoration: InputDecoration(

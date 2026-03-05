@@ -36,6 +36,8 @@ class AppTheme {
 
       surface: AppColorsLight.surface,
       onSurface: AppColorsLight.onSurface,
+
+      outline: AppColorsLight.outline,
     ),
 
     scaffoldBackgroundColor: AppColorsLight.background,
@@ -296,6 +298,8 @@ class AppTheme {
 
       surface: AppColorsDark.surface,
       onSurface: AppColorsDark.onSurface,
+
+      outline: AppColorsDark.outline,
     ),
 
     scaffoldBackgroundColor: AppColorsDark.background,
