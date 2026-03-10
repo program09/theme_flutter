@@ -75,9 +75,9 @@ class _ExampleState extends State<Example> {
           return [
             SliverAppBar(
               title: const Text('Example UI'),
-              floating: true,
-              snap: false,
-              pinned: false,
+              floating: true, // ocultar appbar al bajar
+              snap: true, // mostrar appbar al subir
+              pinned: false, // appbar static
               elevation: innerBoxIsScrolled ? 4 : 0,
               forceElevated: innerBoxIsScrolled,
               backgroundColor: Theme.of(context).colorScheme.surface,

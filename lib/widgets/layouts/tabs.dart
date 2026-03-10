@@ -126,11 +126,17 @@ class TabsUIState extends State<TabsUI> with SingleTickerProviderStateMixin {
     setState(() {
       _currentIndex = index;
     });
-    _pageController.animateToPage(
-      index,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOutCubic,
-    );
+
+    if ((_pageController.page!.round() - index).abs() > 1) {
+      _pageController.jumpToPage(index);
+    } else {
+      _pageController.animateToPage(
+        index,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOutCubic,
+      );
+    }
+
     _scrollToTab(index);
     widget.onTap?.call(_visibleTabs[index]);
   }
