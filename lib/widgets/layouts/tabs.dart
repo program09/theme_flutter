@@ -8,6 +8,7 @@ class TabItem {
   final bool showTab; // mostrar en la lista de tabs
   final bool showIconFocus;
   final int? badge; // numero de notificaciones
+  final bool? loading;
   const TabItem({
     required this.id,
     required this.label,
@@ -15,6 +16,7 @@ class TabItem {
     this.showTab = true,
     this.showIconFocus = true,
     this.badge,
+    this.loading = false,
     required this.child,
   });
 }
@@ -31,6 +33,7 @@ class TabsUI extends StatefulWidget {
   final Color? inactiveColor;
   final List<String> hiddenTabs;
   final Function(TabItem)? onTap;
+  final int initialIndex;
 
   const TabsUI({
     super.key,
@@ -40,6 +43,7 @@ class TabsUI extends StatefulWidget {
     this.activeColor,
     this.inactiveColor,
     this.hiddenTabs = const [],
+    this.initialIndex = 0,
     this.onTap,
   });
 
@@ -60,6 +64,12 @@ class TabsUIState extends State<TabsUI> with SingleTickerProviderStateMixin {
   void initState() {
     super.initState();
     _updateVisibleTabs();
+
+    _currentIndex = widget.initialIndex;
+    if (_currentIndex >= _visibleTabs.length) {
+      _currentIndex = 0;
+    }
+
     _pageController = PageController(initialPage: _currentIndex);
 
     // Inicializar badges desde los TabItems
@@ -224,7 +234,21 @@ class TabsUIState extends State<TabsUI> with SingleTickerProviderStateMixin {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          if (!tab.showIconFocus || isSelected) ...[
+                          if (tab.loading == true) ...[
+                            SizedBox(
+                              width: 14,
+                              height: 14,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  isSelected
+                                      ? theme.colorScheme.onPrimary
+                                      : theme.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                          ] else if (!tab.showIconFocus || isSelected) ...[
                             Icon(
                               tab.icon,
                               size: 17.5,

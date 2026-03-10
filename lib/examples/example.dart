@@ -20,6 +20,16 @@ class _ExampleState extends State<Example> {
   final GlobalKey<TabsUIState> tabsKey = GlobalKey<TabsUIState>();
   late List<TabItem> _tabs;
 
+  String title = 'Example UI';
+
+  int selectedTab = 1;
+
+  void onTabTapped(String tabLabel) {
+    setState(() {
+      title = tabLabel;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -60,6 +70,8 @@ class _ExampleState extends State<Example> {
         badge: 1,
       ),
     ];
+
+    onTabTapped(_tabs[selectedTab].label);
   }
 
   @override
@@ -74,7 +86,7 @@ class _ExampleState extends State<Example> {
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
             SliverAppBar(
-              title: const Text('Example UI'),
+              title: Text(title),
               floating: true, // ocultar appbar al bajar
               snap: true, // mostrar appbar al subir
               pinned: false, // appbar static
@@ -106,10 +118,12 @@ class _ExampleState extends State<Example> {
         },
         body: TabsUI(
           key: tabsKey,
+          initialIndex: selectedTab,
           position: PositionTab.top,
           alignment: AlignmentTab.start,
           onTap: (tab) async {
             print('Tab: ${tab.id}');
+            onTabTapped(tab.label);
           },
           tabs: _tabs,
         ),
