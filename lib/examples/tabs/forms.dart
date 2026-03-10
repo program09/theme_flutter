@@ -119,7 +119,7 @@ class FormsExampleState extends State<FormsExample> {
                       const SizedBox(height: 20),
                       SelectUI(
                         label: 'Opciones as',
-                        value: '55',
+                        value: '5',
                         options: const [
                           Option(value: '1', label: 'Option 1'),
                           Option(value: '2', label: 'Option 2'),

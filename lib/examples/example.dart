@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ui/examples/tabs/alerts.dart';
 import 'package:ui/examples/tabs/forms.dart';
 import 'package:ui/examples/tabs/profile.dart';
 import 'package:ui/widgets/layouts/tabs.dart';
@@ -14,6 +15,8 @@ class _ExampleState extends State<Example> {
   final GlobalKey<FormsExampleState> formsKey = GlobalKey<FormsExampleState>();
   final GlobalKey<ProfileExampleState> profileKey =
       GlobalKey<ProfileExampleState>();
+  final GlobalKey<AlertsExampleState> alertsKey =
+      GlobalKey<AlertsExampleState>();
   final GlobalKey<TabsUIState> tabsKey = GlobalKey<TabsUIState>();
   late List<TabItem> _tabs;
 
@@ -22,25 +25,37 @@ class _ExampleState extends State<Example> {
     super.initState();
     _tabs = [
       TabItem(
-        id: 'general',
-        label: 'General',
-        icon: Icons.settings,
+        id: 'forms',
+        label: 'Formularios',
+        icon: Icons.input,
         child: FormsExample(
           key: formsKey,
           keytab: tabsKey,
-          tabId: 'general',
-          data: const {'name': 'General'},
+          tabId: 'forms',
+          data: const {'name': 'Formularios'},
         ),
       ),
       TabItem(
-        id: 'perfil',
-        label: 'Perfil',
-        icon: Icons.person,
+        id: 'buttons',
+        label: 'Botones',
+        icon: Icons.smart_button_rounded,
         child: ProfileExample(
           key: profileKey,
           keytab: tabsKey,
-          tabId: 'perfil',
-          data: const {'name': 'Perfil'},
+          tabId: 'buttons',
+          data: const {'name': 'Botones'},
+        ),
+        badge: 1,
+      ),
+      TabItem(
+        id: 'alerts',
+        label: 'Alertas',
+        icon: Icons.notifications,
+        child: AlertsExample(
+          key: alertsKey,
+          keytab: tabsKey,
+          tabId: 'alerts',
+          data: const {'name': 'Alertas'},
         ),
         badge: 1,
       ),

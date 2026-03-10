@@ -221,7 +221,7 @@ class TabsUIState extends State<TabsUI> with SingleTickerProviderStateMixin {
                           if (!tab.showIconFocus || isSelected) ...[
                             Icon(
                               tab.icon,
-                              size: 20,
+                              size: 17.5,
                               color: isSelected
                                   ? theme.colorScheme.onPrimary
                                   : theme.colorScheme.onSurfaceVariant,
