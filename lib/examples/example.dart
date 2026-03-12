@@ -1,8 +1,10 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:ui/examples/tabs/alerts.dart';
 import 'package:ui/examples/tabs/forms.dart';
 import 'package:ui/examples/tabs/profile.dart';
-import 'package:ui/widgets/layouts/tabs.dart';
+import 'package:ui/widgets/forms.dart';
 
 class Example extends StatefulWidget {
   const Example({super.key});
@@ -17,7 +19,7 @@ class _ExampleState extends State<Example> {
       GlobalKey<ProfileExampleState>();
   final GlobalKey<AlertsExampleState> alertsKey =
       GlobalKey<AlertsExampleState>();
-  final GlobalKey<TabsUIState> tabsKey = GlobalKey<TabsUIState>();
+  final GlobalKey<TabsUIState> _tabsKey = GlobalKey<TabsUIState>();
   late List<TabItem> _tabs;
 
   String title = 'Example UI';
@@ -40,7 +42,7 @@ class _ExampleState extends State<Example> {
         icon: Icons.input,
         child: FormsExample(
           key: formsKey,
-          keytab: tabsKey,
+          keytab: _tabsKey,
           tabId: 'forms',
           data: const {'name': 'Formularios'},
         ),
@@ -51,7 +53,7 @@ class _ExampleState extends State<Example> {
         icon: Icons.smart_button_rounded,
         child: ProfileExample(
           key: profileKey,
-          keytab: tabsKey,
+          keytab: _tabsKey,
           tabId: 'buttons',
           data: const {'name': 'Botones'},
         ),
@@ -63,7 +65,7 @@ class _ExampleState extends State<Example> {
         icon: Icons.notifications,
         child: AlertsExample(
           key: alertsKey,
-          keytab: tabsKey,
+          keytab: _tabsKey,
           tabId: 'alerts',
           data: const {'name': 'Alertas'},
         ),
@@ -98,7 +100,7 @@ class _ExampleState extends State<Example> {
                 IconButton(
                   onPressed: () {
                     // Ejemplo de cómo establecer el badge
-                    tabsKey.currentState?.setBadge('perfil', 5);
+                    _tabsKey.currentState?.setBadge('perfil', 5);
                   },
                   icon: const Icon(Icons.notifications),
                 ),
@@ -107,8 +109,8 @@ class _ExampleState extends State<Example> {
                     final options = await formsKey.currentState?.getOptions();
                     final options2 = await profileKey.currentState
                         ?.getOptionssdf();
-                    print('Options: $options');
-                    print('Options2: $options2');
+                    log('Options: $options');
+                    log('Options2: $options2');
                   },
                   icon: const Icon(Icons.save),
                 ),
@@ -117,12 +119,12 @@ class _ExampleState extends State<Example> {
           ];
         },
         body: TabsUI(
-          key: tabsKey,
+          key: _tabsKey,
           initialIndex: selectedTab,
           position: PositionTab.top,
           alignment: AlignmentTab.start,
           onTap: (tab) async {
-            print('Tab: ${tab.id}');
+            log('Tab: ${tab.id}');
             onTabTapped(tab.label);
           },
           tabs: _tabs,

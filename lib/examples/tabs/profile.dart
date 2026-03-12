@@ -1,8 +1,8 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
-import 'package:ui/widgets/bottons/badge.dart';
-import 'package:ui/widgets/bottons/bottons.dart';
-import 'package:ui/widgets/forms/options.dart';
-import 'package:ui/widgets/layouts/tabs.dart';
+import 'package:ui/widgets/components.dart';
+import 'package:ui/widgets/forms.dart';
 
 class ProfileExample extends StatefulWidget {
   final Map<String, dynamic>? data;
@@ -21,7 +21,7 @@ class ProfileExample extends StatefulWidget {
 
 class ProfileExampleState extends State<ProfileExample> {
   void save() {
-    print('Guardando Tab de Perfil...');
+    log('Guardando Tab de Perfil...');
   }
 
   Future<List<Option>> getOptionssdf() async {
@@ -102,7 +102,7 @@ class ProfileExampleState extends State<ProfileExample> {
           style: style,
           onPressed: () {},
           onLongPress: () {
-            print('Long Press');
+            log('Long Press');
           },
         ),
         BtnUI(

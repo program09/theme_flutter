@@ -1,10 +1,7 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
-import 'package:ui/widgets/forms/input.dart';
-import 'package:ui/widgets/forms/input_autocomplete.dart';
-import 'package:ui/widgets/forms/options.dart';
-import 'package:ui/widgets/forms/select.dart';
-import 'package:ui/widgets/forms/switch.dart';
-import 'package:ui/widgets/layouts/tabs.dart';
+import 'package:ui/widgets/forms.dart';
 
 class FormsExample extends StatefulWidget {
   final Map<String, dynamic>? data;
@@ -69,9 +66,9 @@ class FormsExampleState extends State<FormsExample> {
 
   void save() {
     if (_formKey.currentState?.validate() ?? false) {
-      print('Formulario válido. Guardando...');
+      log('Formulario válido. Guardando...');
     } else {
-      print('Formulario inválido.');
+      log('Formulario inválido.');
     }
   }
 
@@ -172,7 +169,7 @@ class FormsExampleState extends State<FormsExample> {
                         ],
                         prefixIcon: Icons.search,
                         onSelected: (value) {
-                          print('Selected: $value');
+                          log('Selected: $value');
                         },
                         onChanged: (value) {},
                       ),

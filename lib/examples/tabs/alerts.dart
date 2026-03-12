@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:ui/widgets/bottons/alerts.dart';
-import 'package:ui/widgets/layouts/tabs.dart';
+import 'package:ui/widgets/components.dart';
+import 'package:ui/widgets/forms.dart';
 
 class AlertsExample extends StatefulWidget {
   final Map<String, dynamic>? data;
