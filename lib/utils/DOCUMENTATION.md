@@ -209,20 +209,13 @@ final item = await Queue.get(queueName: 'pending_sales', id: 1);
 final items = await Queue.getMany(queueName: 'pending_sales', ids: [1, 2, 3]);
 
 // 10. Get data as object  
-final userAsObject = await Queue.getAs<User>(
-                              queueName: 'users',
-                              id: 4467,
-                              format: User.fromMap,
-                            );
+final userAsObject = await Queue.getAs<User>(queueName: 'users', id: 4467, format: User.fromMap);
 
 // 11. Get all data
 final allItems = await Queue.getAll(queueName: 'pending_sales');
 
 // 12. Get all data as objects
-final allUsersAsObjects = await Queue.getAllAs<User>(
-                                  queueName: 'users',
-                                  format: User.fromMap,
-                                );
+final allUsersAsObjects = await Queue.getAllAs<User>(queueName: 'users', format: User.fromMap);
 
 // 13. Clean queue
 await Queue.clean(queueName: 'pending_sales');
