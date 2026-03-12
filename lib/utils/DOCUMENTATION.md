@@ -190,8 +190,8 @@ await Queue.close(queueName: 'pending_sales');
 // 3. Cerrar todas las colas
 await Queue.closeAll();
 
-// 4. Guardar datos (Persistente)
-await Queue.push(queueName: 'pending_sales', data: {'total': 150.0});
+// 4. Guardar datos (Persistente): asignar id(dynamic) del registro de la cola, si no se envia se genera automáticamente
+await Queue.push(queueName: 'pending_sales', id: 1, data: {'id': 1, 'total': 150.0});
 
 // 5. Procesar y eliminar (FIFO)
 final item = await Queue.pop(queueName: 'pending_sales');

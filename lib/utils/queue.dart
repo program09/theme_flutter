@@ -63,11 +63,17 @@ class Queue {
     dynamic id,
   }) async {
     final box = await _getQueue(queueName);
-    final key = id ?? data['id'];
-    if (box.containsKey(key)) {
-      await box.delete(key);
+
+    if (id == null) {
+      await box.add(data); // genera key int automáticamente
+      return;
     }
-    await box.put(key, data);
+
+    if (box.containsKey(id)) {
+      await box.delete(id);
+    }
+
+    await box.put(id, data);
   }
 
   // Obtener el primero y eliminarlo (como cola FIFO)
