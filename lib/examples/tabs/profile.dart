@@ -1,8 +1,8 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:ui/widgets/components.dart';
-import 'package:ui/widgets/forms.dart';
+import 'package:ui/ui/components.dart';
+import 'package:ui/ui/forms.dart';
 
 class ProfileExample extends StatefulWidget {
   final Map<String, dynamic>? data;

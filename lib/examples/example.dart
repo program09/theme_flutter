@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:ui/examples/tabs/alerts.dart';
 import 'package:ui/examples/tabs/forms.dart';
 import 'package:ui/examples/tabs/profile.dart';
-import 'package:ui/widgets/forms.dart';
+import 'package:ui/ui/forms.dart';
 
 class Example extends StatefulWidget {
   const Example({super.key});
