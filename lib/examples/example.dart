@@ -1,13 +1,56 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:ui/examples/tabs/alerts.dart';
 import 'package:ui/examples/tabs/forms.dart';
 import 'package:ui/examples/tabs/profile.dart';
+import 'package:ui/main.dart';
+import 'package:ui/routers/go.dart';
 import 'package:ui/ui/forms.dart';
 
+// -------------------- USE EXAMPLE -------------------------
+
+// ─────────────────────────────────────────
+//  Rutas nombradas
+// ─────────────────────────────────────────
+class Routes {
+  Routes._();
+
+  static const String home = '/';
+  static const String example = '/example';
+}
+
+// ─────────────────────────────────────────
+//  Páginas / binding
+// ─────────────────────────────────────────
+class AppPages {
+  AppPages._();
+  static final List<GetPage> pages = [
+    GetPage(
+      name: Routes.home,
+      page: () => const HomeScreen(),
+      transition: Transition.fadeIn,
+    ),
+    GetPage(
+      name: Routes.example,
+      page: () {
+        return Example(
+          id: GoArgs.args('id'),
+          projectId: GoArgs.args('projectId').toString(),
+        );
+      },
+      transition: Transition.zoom,
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+  ];
+}
+
+
 class Example extends StatefulWidget {
-  const Example({super.key});
+  final int id;
+  final String? projectId;
+  const Example({super.key, required this.id, this.projectId});
 
   @override
   State<Example> createState() => _ExampleState();
@@ -88,7 +131,12 @@ class _ExampleState extends State<Example> {
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
             SliverAppBar(
-              title: Text(title),
+              title: Text('$title (ID: ${widget.id}, P: ${widget.projectId})'),
+
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => Go.back(result: 'hola'),
+              ),
               floating: true, // ocultar appbar al bajar
               snap: true, // mostrar appbar al subir
               pinned: false, // appbar static
