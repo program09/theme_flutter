@@ -36,15 +36,14 @@ class AppPages {
     GetPage(
       name: Routes.example,
       page: () {
+        final projectId = GoArgs.args('projectId');
+        final id = GoArgs.args('id');
         return FutureBuilder(
           future: () async {
             await Future.delayed(const Duration(milliseconds: 500));
 
-            final projectId = GoArgs.args('projectId');
-            final id = GoArgs.args('id');
-
             if (projectId == null || id == null) {
-              throw ErrorCode.notFound;
+              throw ErrorCode.notFound ;
             }
 
             try {
@@ -64,7 +63,7 @@ class AppPages {
 
             final result = snapshot.data as Map<String, dynamic>;
             // Pasas los datos a tu widget Example
-            return Example(id: result['id'], projectId: result['projectId']);
+            return Example(id: id, projectId: result['projectId']);
           },
         );
       },
