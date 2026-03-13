@@ -9,24 +9,24 @@ class Go {
   // Ir a nueva ruta
   // arguments: datos que se envian a la nueva ruta
   // parameters: query params para la URL
-  static Future<dynamic> to(
-    String route, {
-    dynamic args,
+  static Future<dynamic> to({
+    required String route,
+    Map<String, dynamic>? args,
     Map<String, String>? params,
   }) =>
       Get.toNamed(route, arguments: args, parameters: params) ??
       Future.value(null);
 
   // Ir a nueva ruta y cerrar la anterior
-  static void off(
-    String route, {
+  static void off({
+    required String route,
     dynamic args,
     Map<String, String>? params,
   }) => Get.offNamed(route, arguments: args, parameters: params);
 
   // Ir a nueva ruta y cerrar todas las anteriores
-  static void offAll(
-    String route, {
+  static void offAll({
+    required String route,
     dynamic args,
     Map<String, String>? params,
   }) => Get.offAllNamed(route, arguments: args, parameters: params);

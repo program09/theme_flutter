@@ -7,6 +7,7 @@ import 'package:ui/examples/tabs/forms.dart';
 import 'package:ui/examples/tabs/profile.dart';
 import 'package:ui/main.dart';
 import 'package:ui/routers/go.dart';
+import 'package:ui/routers/go_error.dart';
 import 'package:ui/ui/forms.dart';
 
 // -------------------- USE EXAMPLE -------------------------
@@ -35,17 +36,42 @@ class AppPages {
     GetPage(
       name: Routes.example,
       page: () {
-        return Example(
-          id: GoArgs.args('id'),
-          projectId: GoArgs.args('projectId').toString(),
+        return FutureBuilder(
+          future: () async {
+            await Future.delayed(const Duration(milliseconds: 500));
+
+            final projectId = GoArgs.args('projectId');
+            final id = GoArgs.args('id');
+
+            if (projectId == null || id == null) {
+              throw ErrorCode.notFound;
+            }
+
+            try {
+              return {'id': id, 'projectId': projectId.toString()};
+            } catch (e) {
+              throw 'Error al consultar la base de datos: $e';
+            }
+          }(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const LoadingScreen();
+            }
+
+            if (snapshot.hasError) {
+              return ErrorScreen(message: snapshot.error.toString());
+            }
+
+            final result = snapshot.data as Map<String, dynamic>;
+            // Pasas los datos a tu widget Example
+            return Example(id: result['id'], projectId: result['projectId']);
+          },
         );
       },
-      transition: Transition.zoom,
-      transitionDuration: const Duration(milliseconds: 300),
+      transition: Transition.fadeIn,
     ),
   ];
 }
-
 
 class Example extends StatefulWidget {
   final int id;
