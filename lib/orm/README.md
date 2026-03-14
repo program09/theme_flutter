@@ -1,144 +1,283 @@
-# Custom Flutter ORM
+# Professional Flutter ORM Documentation
 
-This is a lightweight object-relational mapping (ORM) library built for Flutter using `sqflite_sqlcipher`. 
+A comprehensive guide to using the custom ORM, built for efficiency, security, and flexibility.
 
-## Features
-* Automatic table creation based on strictly-typed schemas.
-* Type-safe CRUD operations.
-* Fluent Query Builder for constructing complex where clauses, limits, offsets, and ordering.
-* Model-driven design for handling row mappings smoothly.
+---
 
-## Setup
+## 🛠️ 1. Schema Definitions (Tables & Columns)
+# 🚀 Flutter Encrypted ORM
 
-Before you use the database, you must properly initialize `DatabaseManager` with a `DatabaseConfig` and a list of your models.
+Un ORM potente, cifrado (SQLCipher) y fácil de usar para Flutter. Soporta tipos avanzados, migraciones automáticas, soft deletes y múltiples instancias centralizadas.
 
-```dart
-import 'package:ui/orm/core/db_manager.dart';
-import 'package:ui/orm/core/database_config.dart';
-// import your models here
+## 📦 Instalación
 
-void main() async {
-  // Pass configuration and the list of models to automatically create the desired tables.
-  await DatabaseManager().initialize(
-    const DatabaseConfig(
-      dbName: 'my_app.db', 
-      version: 1, 
-      password: 'my_super_secure_password' // Optional: SQLCipher encryption key
-    ),
-    [
-      User(name: '', age: 0), // Base instances for generating schemas
-    ], 
-  );
-}
+Añade estas dependencias en tu `pubspec.yaml`:
+
+```yaml
+dependencies:
+  sqflite_sqlcipher: latest
+  path: latest
+  synchronized: latest
 ```
 
-## Creating a Model
+---
 
-All database models must extend the `Model` base class.
+## 🏗️ 1. Definición de Modelos
 
-1. Implement the `tableSchema` getter using `TableSchema` and `Field`.
-2. Implement the `toMap()` function for SQL extraction.
-3. Provide a factory `fromMap(Map<String, dynamic> map)` static/factory method for inflation.
+Tus modelos deben extender de `Model` y definir un `TableSchema` estático.
 
 ```dart
-import 'package:ui/orm/models/model.dart';
-import 'package:ui/orm/schema/table_schema.dart';
-import 'package:ui/orm/schema/field.dart';
-
 class User extends Model {
   final int? id;
   final String name;
-  final int age;
-  final bool isActive;
+  final Map<String, dynamic>? metadata; // JSON
 
-  User({this.id, required this.name, required this.age, this.isActive = true});
+  User({this.id, required this.name, this.metadata});
+
+  // 1. Esquema de la tabla
+  static TableSchema get tableSchema => TableSchema(
+    tableName: 'users',
+    fields: [
+      Field.integer('id', isPrimaryKey: true, autoIncrement: true),
+      Field.text('name', isNullable: false),
+      Field.json('metadata'), // Tipo JSON soportado
+      Field.datetime('created_at'),
+    ],
+    uniqueTogether: ['name'], // Restricciones únicas
+  );
 
   @override
-  TableSchema get tableSchema => TableSchema(
-        tableName: 'users',
-        fields: [
-          Field.integer('id', isPrimaryKey: true, autoIncrement: true),
-          Field.text('name', isNullable: false),
-          Field.integer('age', isNullable: false),
-          Field.boolean('is_active', isNullable: false),
-        ],
-      );
+  Map<String, dynamic> toMap() => {
+    'id': id,
+    'name': name,
+    'metadata': metadata,
+  };
+
+  static User fromMap(Map<String, dynamic> map) => User(
+    id: map['id'],
+    name: map['name'],
+    metadata: map['metadata'],
+  );
 
   @override
-  Map<String, dynamic> toMap() {
-    return {
-      if (id != null) 'id': id,
-      'name': name,
-      'age': age,
-      'is_active': isActive ? 1 : 0,
-    };
-  }
+  TableSchema get instanceTableSchema => tableSchema;
+}
+```
 
-  factory User.fromMap(Map<String, dynamic> map) {
-    return User(
-      id: map['id'] as int?,
-      name: map['name'] as String,
-      age: map['age'] as int,
-      isActive: (map['is_active'] as int) == 1,
+---
+
+## 🔐 2. Inicialización Centralizada
+
+Usa un `DatabaseHelper` para centralizar la configuración del ORM.
+
+```dart
+class DatabaseHelper {
+  static final DatabaseHelper _instance = DatabaseHelper._internal();
+  factory DatabaseHelper() => _instance;
+  DatabaseHelper._internal();
+
+  Database? _db;
+
+  Future<Database> get database async {
+    if (_db != null) return _db!;
+    
+    // El ORM maneja apertura, cifrado y tablas automáticamente
+    _db = await DatabaseManager().initialize(
+      DatabaseConfig(
+        dbName: 'app.db',
+        version: 1,
+        password: 'tu_clave_segura',
+        enableTimestamps: true, // Auto created_at, updated_at
+        tables: [User.tableSchema, Post.tableSchema], // Registra tus tablas
+        onUpgrade: (db, old, newV) async {
+          // Migraciones usando el ORM
+          if (old < 2) {
+            await User.tableSchema.addColumn(db, 'is_active', Field.integer('is_active', defaultValue: 1));
+          }
+        },
+      ),
     );
+    return _db!;
   }
 }
 ```
 
-### Supported Field Types
+---
 
-The `Field` class provides several factory constructors for common SQL types:
-* `Field.integer(name)` - Used for standard Ints, IDs, auto-increments.
-* `Field.text(name)` - Used for Strings.
-* `Field.real(name)` - Used for floating/double precision.
-* `Field.boolean(name)` - Virtual type mapping `bool` under the hood to `INTEGER (0 or 1)`.
-* `Field.datetime(name)` - Virtual type mapping `DateTime` to ISO-8601 strings.
+## 🏛️ 3. Operaciones de Repositorio
 
-## Database Operations
-
-Operations are driven by the generic `Repository<T>`. You initialize a repository with the table schema and your model's Map inflating factory.
+El `Repository<T>` te da superpoderes para manejar tus datos.
 
 ```dart
-final userRepository = Repository<User>(
-  User(name: '', age: 0).tableSchema, 
-  User.fromMap,
+final db = await DatabaseHelper().database;
+final userRepo = Repository<User>(User.tableSchema, User.fromMap, executor: db);
+
+// Insertar
+await userRepo.insert(User(name: 'Alice', metadata: {'age': 25}));
+
+// Buscar
+List<User> users = await userRepo.findAll();
+User? user = await userRepo.findById(1);
+
+// Query Builder Avanzado
+final posts = await QueryBuilder('posts')
+    .select(['posts.id', 'posts.title', 'users.name as author'])
+    .innerJoin('users', 'users.id = posts.user_id')
+    .where('posts.is_active', 1)
+    .orderBy('posts.created_at', descending: true)
+    .get();
+```
+
+---
+
+## 📱 4. Ejemplo Práctico en Pantalla (UI)
+
+Usa `FutureBuilder` o `StreamBuilder` para mostrar datos de forma reactiva.
+
+```dart
+class UserListScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Usuarios")),
+      body: FutureBuilder<List<User>>(
+        future: _fetchUsers(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) return CircularProgressIndicator();
+          
+          return ListView.builder(
+            itemCount: snapshot.data!.length,
+            itemBuilder: (context, index) {
+              final user = snapshot.data![index];
+              return ListTile(
+                title: Text(user.name),
+                subtitle: Text("ID: ${user.id}"),
+                onTap: () => _deleteUser(user.id!),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  Future<List<User>> _fetchUsers() async {
+    final db = await DatabaseHelper().database;
+    final repo = Repository<User>(User.tableSchema, User.fromMap, executor: db);
+    return await repo.findAll();
+  }
+}
+```
+
+---
+
+## 🌟 Características Avanzadas
+
+### Múltiples Instancias
+Puedes manejar bases de datos separadas (ej. Logs vs Datos de Usuario):
+```dart
+final logsManager = DatabaseManager('logs');
+await logsManager.initialize(DatabaseConfig(dbName: 'logs.db', ...));
+```
+
+### Tipos Geoespaciales y JSON
+El ORM mapea automáticamente `JSON`, `POINT`, `POLYGON`, etc.
+```dart
+Field.point('location');
+Field.json('settings');
+```
+
+### Soft Deletes
+Si habilitas timestams, `repo.softDelete(id)` marcará la fila como borrada y `findAll()` la ignorará automáticamente.
+
+
+## 🔌 3. Dependency Injection & Multi-Database
+
+The ORM is fully decoupled. You can inject a specific database instance (or a transaction) into any Repository or QueryBuilder.
+
+### Using Multiple Databases
+If your app uses several databases, simply pass the `executor` to the repository:
+
+```dart
+final db1 = await openDatabase('db1.db');
+final db2 = await openDatabase('db2.db');
+
+final repo1 = Repository<User>(User.tableSchema, User.fromMap, executor: db1);
+final repo2 = Repository<User>(User.tableSchema, User.fromMap, executor: db2);
+```
+
+### Transactions
+Since `Repository` accepts a `DatabaseExecutor`, you can perform operations inside a transaction:
+
+```dart
+final db = await DatabaseManager().database;
+
+await db.transaction((txn) async {
+  final repo = Repository<User>(User.tableSchema, User.fromMap, executor: txn);
+  await repo.insert(User(name: 'Alice'));
+  await repo.insert(User(name: 'Bob'));
+  // Everything inside txn is atomic
+});
+```
+
+### Decoupling (Custom Database Helpers)
+If you prefer managing your own database lifecycle (e.g. `DatabaseHelper`), tell the ORM to use your instance:
+
+```dart
+class MyHelper {
+  Future<void> init() async {
+    final db = await openDatabase(...);
+    
+    // Link ORM to your managed DB
+    DatabaseManager().useExternalDatabase(db);
+    
+    // ORM will use 'db' for all global operations
+    await DatabaseManager().initialize(DatabaseConfig(...));
+  }
+}
+```
+
+---
+
+## 🔍 4. Advanced QueryBuilder (`addSelect`)
+
+The `QueryBuilder` allows injecting raw SQL directly into the selection or where clauses.
+
+### Subqueries and Raw Selects
+Use `addSelect` to add calculated fields or subqueries:
+
+```dart
+final posts = await QueryBuilder('posts')
+    .select(['posts.id', 'posts.title'])
+    // Inject a subquery or custom SQL
+    .addSelect('(SELECT COUNT(*) FROM comments WHERE comments.post_id = posts.id) AS comment_count')
+    .innerJoin('users', 'users.id = posts.user_id')
+    .where('posts.is_active', 1)
+    .get();
+
+// Access the raw data
+final commentCount = posts.first['comment_count'];
+```
+
+---
+
+## 🔄 4. Initialization & Migrations
+
+Register everything in `DatabaseConfig`. Use the `onUpgrade` callback to evolve the schema as your app grows.
+
+```dart
+await DatabaseManager().initialize(
+  DatabaseConfig(
+    dbName: 'app.db',
+    version: 2,
+    tables: [User.tableSchema, Post.tableSchema], // All tables here
+    onUpgrade: (db, old, new) async {
+      if (old < 2) {
+        // Add a new column to an existing table
+        await User.tableSchema.addColumn(db, 'is_active', Field.integer('is_active', defaultValue: 1));
+      }
+    },
+  ),
 );
 ```
 
-### Insert
-```dart
-final newUserId = await userRepository.insert(User(name: 'Alice', age: 25));
-```
-
-### Update
-Update expects the whole instance containing its assigned Primary Key.
-```dart
-final aliceModified = User(id: 1, name: 'Alice', age: 26);
-await userRepository.update(aliceModified);
-```
-
-### Delete 
-```dart
-await userRepository.delete(userToDelete);
-```
-
-### Querying
-
-You can fetch all results instantly using the base `.findAll()`.
-```dart
-final allUsers = await userRepository.findAll();
-```
-
-For advanced filters, use the Query Builder logic via `.query`:
-
-```dart
-// Basic where filter
-final activeUsers = await userRepository.query
-   .where('is_active', 1)
-   .orderBy('age', descending: true)
-   .limit(10)
-   .get();
-
-// Retrieve first matching object
-final bob = await userRepository.query.where('name', 'Bob').first();
-```

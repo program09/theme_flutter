@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ui/examples/example.dart';
+import 'package:ui/orm/example/orm_demo_screen.dart';
 import 'package:ui/routers/go.dart';
 import 'package:ui/ui/theme.dart';
 
@@ -58,6 +59,15 @@ class _HomeScreenState extends State<HomeScreen> {
               onPressed: _irAExample,
               icon: const Icon(Icons.play_arrow_rounded),
               label: const Text('Ir a Example'),
+            ),
+
+            const SizedBox(height: 12),
+            ElevatedButton.icon(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const OrmDemoScreen()),
+              ),
+              icon: const Icon(Icons.storage),
+              label: const Text('Ir a ORM Demo'),
             ),
 
             // Muestra el resultado recibido al volver

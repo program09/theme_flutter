@@ -3,8 +3,13 @@ enum FieldType {
   real('REAL'),
   text('TEXT'),
   blob('BLOB'),
-  boolean('INTEGER'), // SQLite doesn't have a boolean type, uses 0/1 natively
-  datetime('TEXT'); // Stored as ISO8601 string
+  boolean('INTEGER'),
+  datetime('TEXT'),
+  json('TEXT'),
+  point('TEXT'),
+  polygon('TEXT'),
+  line('TEXT'),
+  multiline('TEXT');
 
   final String sqlKeyword;
   const FieldType(this.sqlKeyword);
@@ -67,7 +72,7 @@ class Field {
     }
   }
 
-  // Pre-defined factory constructors for common types to keep user code simple
+  // Pre-defined factory constructors
   factory Field.integer(String name, {bool isPrimaryKey = false, bool autoIncrement = false, bool isNullable = true, bool unique = false, int? defaultValue}) {
     return Field(name, FieldType.integer, isPrimaryKey: isPrimaryKey, autoIncrement: autoIncrement, isNullable: isNullable, unique: unique, defaultValue: defaultValue);
   }
@@ -88,6 +93,18 @@ class Field {
     return Field(name, FieldType.datetime, isNullable: isNullable, defaultValue: defaultValue?.toIso8601String());
   }
 
+  factory Field.json(String name, {bool isNullable = true}) {
+    return Field(name, FieldType.json, isNullable: isNullable);
+  }
+
+  factory Field.point(String name, {bool isNullable = true}) {
+    return Field(name, FieldType.point, isNullable: isNullable);
+  }
+
+  factory Field.polygon(String name, {bool isNullable = true}) {
+    return Field(name, FieldType.polygon, isNullable: isNullable);
+  }
+
   // Converts a database raw value to the corresponding Dart type
   dynamic parseFromDb(dynamic dbValue) {
     if (dbValue == null) return null;
@@ -97,6 +114,10 @@ class Field {
         return dbValue == 1;
       case FieldType.datetime:
         return DateTime.parse(dbValue as String);
+      case FieldType.json:
+        // Users should handle actual JSON parsing if needed, 
+        // ORM provides it as string/dynamic
+        return dbValue; 
       default:
         return dbValue;
     }
@@ -111,6 +132,9 @@ class Field {
         return (dartValue as bool) ? 1 : 0;
       case FieldType.datetime:
         return (dartValue as DateTime).toIso8601String();
+      case FieldType.json:
+        // No auto-serialization to avoid dependency on dart:convert here if not needed
+        return dartValue; 
       default:
         return dartValue; 
     }

@@ -1,22 +1,35 @@
 import 'package:sqflite_sqlcipher/sqflite.dart';
 import 'package:ui/orm/core/db_manager.dart';
 
+/// Fluent query builder and basic DML helpers
 class QueryBuilder {
   final String tableName;
-  
+  final DatabaseExecutor? executor;
+
   List<String>? _selectColumns;
   String? _whereClause;
   List<dynamic>? _whereArgs;
   String? _orderByClause;
+  String? _groupByClause;
   int? _limitValue;
   int? _offsetValue;
   final List<String> _joins = [];
 
-  QueryBuilder(this.tableName);
+  QueryBuilder(this.tableName, {this.executor});
+
+  Future<DatabaseExecutor> get _db async =>
+      executor ?? await DatabaseManager().database;
 
   /// Select specific columns
   QueryBuilder select(List<String> columns) {
     _selectColumns = columns;
+    return this;
+  }
+
+  /// Add columns to the current selection
+  QueryBuilder addSelect(String sql) {
+    _selectColumns ??= [];
+    _selectColumns!.add(sql);
     return this;
   }
 
@@ -26,29 +39,59 @@ class QueryBuilder {
     return this;
   }
 
+  QueryBuilder innerJoin(String table, String condition) {
+    return join(table, condition, type: 'INNER');
+  }
+
+  QueryBuilder leftJoin(String table, String condition) {
+    return join(table, condition, type: 'LEFT');
+  }
+
   /// Add a WHERE condition
   QueryBuilder where(String column, dynamic value, {String operator = '='}) {
-    if (_whereClause == null) {
-      _whereClause = '$column $operator ?';
-      _whereArgs = [value];
-    } else {
-      _whereClause = '$_whereClause AND $column $operator ?';
-      _whereArgs!.add(value);
-    }
-    return this;
+    return andWhere('$column $operator ?', [value]);
   }
-  
-  /// Add a WHERE condition explicitly
-  QueryBuilder whereRaw(String where, List<dynamic> args) {
+
+  /// Add an AND WHERE condition explicitly
+  QueryBuilder andWhere(String where, [List<dynamic> args = const []]) {
     if (_whereClause == null) {
       _whereClause = where;
-      _whereArgs = args;
+      _whereArgs = [...args];
     } else {
-      _whereClause = '$_whereClause AND $where';
+      _whereClause = '($_whereClause) AND ($where)';
       _whereArgs!.addAll(args);
     }
     return this;
   }
+
+  /// Add an OR WHERE condition
+  QueryBuilder orWhere(String where, [List<dynamic> args = const []]) {
+    if (_whereClause == null) {
+      _whereClause = where;
+      _whereArgs = [...args];
+    } else {
+      _whereClause = '($_whereClause) OR ($where)';
+      _whereArgs!.addAll(args);
+    }
+    return this;
+  }
+
+  /// Add a WHERE condition explicitly (shorthand for andWhere)
+  QueryBuilder whereRaw(String where, [List<dynamic> args = const []]) {
+    return andWhere(where, args);
+  }
+
+  /// Add a GROUP BY clause
+  QueryBuilder groupBy(String group) {
+    _groupByClause = group;
+    return this;
+  }
+
+  /// Get current where clause (for repository.count)
+  String? getWhereClause() => _whereClause;
+
+  /// Get current where args (for repository.count)
+  List<dynamic>? getWhereArgs() => _whereArgs;
 
   /// Add an ORDER BY clause
   QueryBuilder orderBy(String column, {bool descending = false}) {
@@ -75,7 +118,7 @@ class QueryBuilder {
 
   /// Execute a SELECT query
   Future<List<Map<String, Object?>>> get() async {
-    final db = await DatabaseManager().database;
+    final db = await _db;
 
     if (_joins.isEmpty) {
       return await db.query(
@@ -89,26 +132,32 @@ class QueryBuilder {
       );
     } else {
       // Build raw query for joins
-      final selectPart = _selectColumns != null ? _selectColumns!.join(', ') : '*';
+      final selectPart = _selectColumns != null
+          ? _selectColumns!.join(', ')
+          : '*';
       final joinPart = _joins.join(' ');
-      
-      var sql = 'SELECT $selectPart FROM $tableName $joinPart';
-      
+
+      final buffer = StringBuffer(
+        'SELECT $selectPart FROM $tableName $joinPart',
+      );
+
       if (_whereClause != null) {
-        sql += ' WHERE $_whereClause';
+        buffer.write(' WHERE $_whereClause');
+      }
+      if (_groupByClause != null) {
+        buffer.write(' GROUP BY $_groupByClause');
       }
       if (_orderByClause != null) {
-        sql += ' ORDER BY $_orderByClause';
+        buffer.write(' ORDER BY $_orderByClause');
       }
       if (_limitValue != null) {
+        buffer.write(' LIMIT $_limitValue');
         if (_offsetValue != null) {
-          sql += ' LIMIT $_limitValue OFFSET $_offsetValue';
-        } else {
-          sql += ' LIMIT $_limitValue';
+          buffer.write(' OFFSET $_offsetValue');
         }
       }
-      
-      return await db.rawQuery(sql, _whereArgs);
+
+      return await db.rawQuery(buffer.toString(), _whereArgs);
     }
   }
 
@@ -122,7 +171,7 @@ class QueryBuilder {
 
   /// Execute an INSERT operation
   Future<int> insert(Map<String, dynamic> data) async {
-    final db = await DatabaseManager().database;
+    final db = await _db;
     return await db.insert(
       tableName,
       data,
@@ -132,7 +181,7 @@ class QueryBuilder {
 
   /// Execute an UPDATE operation
   Future<int> update(Map<String, dynamic> data) async {
-    final db = await DatabaseManager().database;
+    final db = await _db;
     return await db.update(
       tableName,
       data,
@@ -143,11 +192,20 @@ class QueryBuilder {
 
   /// Execute a DELETE operation
   Future<int> delete() async {
-    final db = await DatabaseManager().database;
+    final db = await _db;
     return await db.delete(
       tableName,
       where: _whereClause,
       whereArgs: _whereArgs,
     );
+  }
+
+  /// Execute a raw query (use carefully)
+  Future<List<Map<String, Object?>>> raw(
+    String sql, [
+    List<Object?>? args,
+  ]) async {
+    final db = await _db;
+    return await db.rawQuery(sql, args);
   }
 }

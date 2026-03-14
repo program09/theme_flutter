@@ -9,14 +9,18 @@ Future<void> main() async {
   print('Starting ORM Testing...');
 
   DatabaseManager().initialize(
-    const DatabaseConfig(dbName: 'test_orm.db', version: 1, password: 'my_super_secret_password'),
-    [User(name: '', age: 0)], 
+    DatabaseConfig(
+      dbName: 'test_orm.db', 
+      version: 1, 
+      password: 'my_super_secret_password',
+      tables: [User.tableSchema],
+    ),
   );
 
   await DatabaseManager().database;
   print('Database created with User tables auto-generated.');
 
-  final userRepository = Repository<User>(User(name: '', age: 0).tableSchema, User.fromMap);
+  final userRepository = Repository<User>(User.tableSchema, User.fromMap);
 
   print('--- Insert Data ---');
   final user1Id = await userRepository.insert(User(name: 'Alice', age: 25));
@@ -29,12 +33,22 @@ Future<void> main() async {
   final allUsers = await userRepository.findAll();
   print('All users: ${allUsers.map((u) => "${u.name} (age: ${u.age}, active: ${u.isActive})").toList()}');
 
+  final count = await userRepository.count();
+  print('Total users count: $count');
+
   print('--- Advanced Query Building ---');
   final activeQuery = await userRepository.query.where('is_active', 1).get();
   print('Raw active query results: $activeQuery');
   
   final getBob = await userRepository.query.where('name', 'Bob').first();
   print('First object matching name Bob: $getBob');
+
+  final adults = await userRepository.query
+      .whereRaw('age >= ? AND is_active = ?', [18, 1])
+      .orderBy('age', descending: true)
+      .limit(5)
+      .get();
+  print('Adults active (top 5): $adults');
 
   print('--- Update Data ---');
   final userToUpdate = allUsers.firstWhere((u) => u.name == 'Alice');
@@ -49,9 +63,16 @@ Future<void> main() async {
 
   print('--- Delete Operations ---');
   final userToDelete = updatedUsers.firstWhere((u) => u.name == 'Bob');
-  await userRepository.delete(userToDelete);
+  await userRepository.delete(userToDelete.id);
   print('Deleted Bob.');
 
   final finalUsers = await userRepository.findAll();
   print('Final remaining users: ${finalUsers.map((u) => u.name).toList()}');
+
+  print('--- Find helpers ---');
+  final maybeAlice = await userRepository.findById(1);
+  print('findById(1): $maybeAlice');
+
+  final inactive = await userRepository.findWhere('is_active', 0);
+  print('Inactive users: $inactive');
 }

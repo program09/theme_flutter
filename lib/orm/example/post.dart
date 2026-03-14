@@ -9,6 +9,8 @@ class Post extends Model {
   final String title;
   final String content;
 
+  Post.empty() : this(userId: 0, title: '', content: '');
+
   Post({
     this.id,
     required this.userId,
@@ -16,8 +18,7 @@ class Post extends Model {
     required this.content,
   });
 
-  @override
-  TableSchema get tableSchema => TableSchema(
+  static TableSchema get tableSchema => TableSchema(
         tableName: 'posts',
         fields: [
           Field.integer('id', isPrimaryKey: true, autoIncrement: true),
@@ -37,6 +38,9 @@ class Post extends Model {
           ['user_id', 'title'], // A user cannot have two posts with exactly the same title
         ]
       );
+
+  @override
+  TableSchema get instanceTableSchema => Post.tableSchema;
 
   @override
   Map<String, dynamic> toMap() {

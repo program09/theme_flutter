@@ -1,6 +1,6 @@
+import 'dart:async';
 import 'package:sqflite_sqlcipher/sqflite.dart';
 import 'package:path/path.dart';
-import '../models/model.dart';
 import 'database_config.dart';
 
 class DatabaseManager {
@@ -10,19 +10,73 @@ class DatabaseManager {
 
   Database? _database;
   DatabaseConfig? _config;
-  List<Model>? _models;
+  final Completer<void> _initCompleter = Completer<void>();
+  bool _isInitializing = false;
 
-  Future<void> initialize(DatabaseConfig config, List<Model> models) async {
+  Future<Database> initialize(DatabaseConfig config) async {
+    if (_isInitializing) {
+      await _initCompleter.future;
+      return _database!;
+    }
+
+    // If already initialized with same config, do nothing
+    if (_database != null && _config == config) return _database!;
+
+    _isInitializing = true;
     _config = config;
-    _models = models;
-    await database; // force init
+
+    try {
+      // If we had a database and it wasn't set externally, close it
+      if (_database != null) {
+        await _database!.close();
+        _database = null;
+      }
+
+      // Perform the actual initialization if not already set externally
+      if (_database == null) {
+        final db = await _initDatabase();
+        await _createTables(db);
+        _database = db;
+      } else {
+        // If it was set externally, we still ensure tables exist
+        await _createTables(_database!);
+      }
+      
+      if (!_initCompleter.isCompleted) _initCompleter.complete();
+      return _database!;
+    } catch (e) {
+      if (!_initCompleter.isCompleted) _initCompleter.completeError(e);
+      _isInitializing = false; // Reset so we can try again
+      rethrow;
+    } finally {
+      // Done initializing
+    }
+  }
+
+  /// Allows the user to provide an existing database instance
+  /// Call this BEFORE initialize()
+  void useExternalDatabase(Database db) {
+    if (_database != null && _database != db) {
+      _database!.close();
+    }
+    _database = db;
+    // Mark as initialized if we are setting an external DB
+    if (!_initCompleter.isCompleted) {
+      _initCompleter.complete();
+    }
   }
 
   Future<Database> get database async {
+    // If already initialized, return it
     if (_database != null) return _database!;
-    if (_config == null) throw Exception('DatabaseManager must be initialized first');
-    _database = await _initDatabase();
-    return _database!;
+
+    // If currently initializing, wait for it
+    if (_isInitializing) {
+      await _initCompleter.future;
+      return _database!;
+    }
+
+    throw Exception('DatabaseManager must be initialized first');
   }
 
   Future<Database> _initDatabase() async {
@@ -33,14 +87,34 @@ class DatabaseManager {
       path,
       password: _config!.password,
       version: _config!.version,
-      onCreate: (db, version) async {
-        if (_models != null) {
-          for (final model in _models!) {
-            await db.execute(model.tableSchema.createTableSql());
-          }
-        }
+      onConfigure: (db) async {
+        // Ensure foreign keys are enforced
+        await db.execute('PRAGMA foreign_keys = ON');
       },
-      onUpgrade: _config!.onUpgrade,
+      onCreate: (db, version) async {
+        await _createTables(db);
+      },
+      onUpgrade: (db, oldVersion, newVersion) async {
+        // First run the user-provided upgrade logic if any
+        if (_config!.onUpgrade != null) {
+          await _config!.onUpgrade!(db, oldVersion, newVersion);
+        }
+        // Then ensure all current models have their tables
+        await _createTables(db);
+      },
     );
+  }
+
+  Future<void> _createTables(Database db) async {
+    if (_config == null) return;
+
+    for (final schema in _config!.tables) {
+      if (_config!.enableTimestamps) {
+        schema.addTimestamps();
+      }
+      final sql = schema.createTableSql();
+      print('ORM: Ensuring table exists: ${schema.tableName}');
+      await db.execute(sql);
+    }
   }
 }
