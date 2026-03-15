@@ -137,6 +137,26 @@ class FileManager {
     }
   }
 
+  static Future<void> deleteFileDirectory({
+    required TypeDirectory typeDirectory,
+    required String folder,
+    required String fileName,
+  }) async {
+    final directory = await getAppDir(typeDirectory: typeDirectory);
+    if (directory == null) return;
+    final filePath = File(join(directory.path, folder, fileName));
+    if (await filePath.exists()) {
+      await filePath.delete();
+    }
+  }
+
+  static Future<void> deleteFilePath({required String path}) async {
+    final filePath = File(path);
+    if (await filePath.exists()) {
+      await filePath.delete();
+    }
+  }
+
   static Future<bool> existFileDirectory({
     required TypeDirectory typeDirectory,
     required String folder,
@@ -177,7 +197,7 @@ class FileManager {
     try {
       if (!await file.exists()) return null;
       final bytes = await file.readAsBytes();
-      
+
       final cacheDir = await getCacheDirectoryApp();
       if (cacheDir == null) return null;
 
