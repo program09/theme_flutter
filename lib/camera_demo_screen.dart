@@ -17,14 +17,16 @@ class _CameraDemoScreenState extends State<CameraDemoScreen> {
   bool _isLoading = false;
   String _statusText = '';
   bool _isEncrypted = false;
-  
+
   static const String _appKey = 'clave_secreta_de_32_caract_!!_123';
   static const String _appIv = 'iv_personal_16_!!';
 
   Future<void> _pickImage(ImageSource source) async {
     setState(() {
       _isLoading = true;
-      _statusText = source == ImageSource.camera ? 'Abriendo cámara...' : 'Abriendo galería...';
+      _statusText = source == ImageSource.camera
+          ? 'Abriendo cámara...'
+          : 'Abriendo galería...';
     });
 
     try {
@@ -35,11 +37,11 @@ class _CameraDemoScreenState extends State<CameraDemoScreen> {
 
       if (photo != null) {
         setState(() => _statusText = 'Guardando archivo...');
-        
+
         final fileName = 'img_${DateTime.now().millisecondsSinceEpoch}.jpg';
         final savedFile = await FileManager.saveFile(
-          typeDirectory: TypeDirectory.public,
-          folder: 'Media_Demo',
+          typeDirectory: TypeDirectory.external,
+          folder: '',
           fileName: fileName,
           file: File(photo.path),
         );
@@ -61,7 +63,7 @@ class _CameraDemoScreenState extends State<CameraDemoScreen> {
 
   Future<void> _encryptCurrent() async {
     if (_image == null || _isEncrypted) return;
-    
+
     setState(() {
       _isLoading = true;
       _statusText = 'Encriptando...';
@@ -135,24 +137,42 @@ class _CameraDemoScreenState extends State<CameraDemoScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                _isEncrypted ? 'ARCHIVO ENCRIPTADO (Binario)' : 'ARCHIVO DESENCRIPTADO (Imagen)',
+                                _isEncrypted
+                                    ? 'ARCHIVO ENCRIPTADO (Binario)'
+                                    : 'ARCHIVO DESENCRIPTADO (Imagen)',
                                 style: TextStyle(
-                                  color: _isEncrypted ? Colors.red : Colors.green,
+                                  color: _isEncrypted
+                                      ? Colors.red
+                                      : Colors.green,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
                               const SizedBox(height: 10),
                               if (!_isEncrypted)
-                                Expanded(child: Image.file(_image!, key: ValueKey(_image!.path + _isEncrypted.toString())))
+                                Expanded(
+                                  child: Image.file(
+                                    _image!,
+                                    key: ValueKey(
+                                      _image!.path + _isEncrypted.toString(),
+                                    ),
+                                  ),
+                                )
                               else
                                 Container(
                                   width: 200,
                                   height: 200,
                                   color: Colors.grey[300],
-                                  child: const Icon(Icons.lock, size: 80, color: Colors.grey),
+                                  child: const Icon(
+                                    Icons.lock,
+                                    size: 80,
+                                    color: Colors.grey,
+                                  ),
                                 ),
                               const SizedBox(height: 10),
-                              Text('Ruta: ${_image!.path}', style: const TextStyle(fontSize: 10)),
+                              Text(
+                                'Ruta: ${_image!.path}',
+                                style: const TextStyle(fontSize: 10),
+                              ),
                             ],
                           ),
                   ),
@@ -178,13 +198,17 @@ class _CameraDemoScreenState extends State<CameraDemoScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     _ActionButton(
-                      onPressed: _image != null && !_isEncrypted ? _encryptCurrent : null,
+                      onPressed: _image != null && !_isEncrypted
+                          ? _encryptCurrent
+                          : null,
                       icon: Icons.enhanced_encryption,
                       label: 'Encriptar',
                       color: Colors.blue,
                     ),
                     _ActionButton(
-                      onPressed: _image != null && _isEncrypted ? _decryptCurrent : null,
+                      onPressed: _image != null && _isEncrypted
+                          ? _decryptCurrent
+                          : null,
                       icon: Icons.no_encryption,
                       label: 'Desencriptar',
                       color: Colors.orange,
@@ -240,7 +264,10 @@ class _LoadingOverlay extends StatelessWidget {
           children: [
             const CircularProgressIndicator(color: Colors.white),
             const SizedBox(height: 16),
-            Text(text, style: const TextStyle(color: Colors.white, fontSize: 16)),
+            Text(
+              text,
+              style: const TextStyle(color: Colors.white, fontSize: 16),
+            ),
           ],
         ),
       ),
