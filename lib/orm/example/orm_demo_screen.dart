@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ui/orm/repository/repository.dart';
 import 'package:ui/orm/example/databa_helper.dart';
 import 'package:ui/orm/example/seeder.dart';
+import 'package:ui/utils/logs.dart';
 import 'user.dart';
 import 'post.dart';
 import 'category.dart';
@@ -33,7 +34,7 @@ class _OrmDemoScreenState extends State<OrmDemoScreen> {
     postRepository = DatabaseHelper().posts;
     categoryRepository = DatabaseHelper().categories;
     productRepository = DatabaseHelper().products;
-    
+
     _loadData();
   }
 
@@ -52,6 +53,12 @@ class _OrmDemoScreenState extends State<OrmDemoScreen> {
       print(stack);
       setState(() => isLoading = false);
     }
+
+    final databasePath = await DatabaseHelper().getDatabasePath(
+      await DatabaseHelper().database,
+    );
+
+    lg.s(msg: 'ORM Demo: Database path: $databasePath');
   }
 
   Future<void> _refreshUsers() async {
@@ -63,7 +70,7 @@ class _OrmDemoScreenState extends State<OrmDemoScreen> {
       print('ORM Demo: Executing query with relations...');
       final allUsers = await userRepository.find(query);
       print('ORM Demo: Found ${allUsers.length} users.');
-      
+
       setState(() {
         users = allUsers;
         currentView = 'Users';
@@ -204,17 +211,25 @@ class _OrmDemoScreenState extends State<OrmDemoScreen> {
             setState(() => isLoading = true);
             // EJEMPLO: Eager Loading con filtrado y selección de columnas personalizada
             final results = await userRepository.include({
-              'posts': (q) => q.select(['title', 'user_id']).limit(1), // Solo un post y solo estos campos
+              'posts': (q) => q
+                  .select(['title', 'user_id'])
+                  .limit(1), // Solo un post y solo estos campos
               'profile': (q) => q.select(['bio', 'userId']),
             }).findAll();
-            
+
             setState(() {
-              rawResults = results.map((u) => {
-                'user': u.name,
-                'posts_count': u.posts?.length ?? 0,
-                'first_post': u.posts?.isNotEmpty == true ? u.posts!.first.title : 'N/A',
-                'bio': u.profile?.bio ?? 'N/A',
-              }).toList();
+              rawResults = results
+                  .map(
+                    (u) => {
+                      'user': u.name,
+                      'posts_count': u.posts?.length ?? 0,
+                      'first_post': u.posts?.isNotEmpty == true
+                          ? u.posts!.first.title
+                          : 'N/A',
+                      'bio': u.profile?.bio ?? 'N/A',
+                    },
+                  )
+                  .toList();
               currentView = 'Rel-Adv';
               isLoading = false;
             });

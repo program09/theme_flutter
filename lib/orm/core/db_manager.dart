@@ -1,6 +1,9 @@
 import 'dart:async';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 import 'package:sqflite_sqlcipher/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:ui/utils/logs.dart';
 import 'database_config.dart';
 
 class DatabaseManager {
@@ -80,9 +83,19 @@ class DatabaseManager {
   }
 
   Future<Database> _initDatabase() async {
-    final databasesPath = await getDatabasesPath();
-    String path = join(databasesPath, _config!.dbName);
+    Directory? directory;
+    String databasesPath = "";
+    if (Platform.isAndroid) {
+      databasesPath = await getDatabasesPath();
+    } else if (Platform.isIOS) {
+      directory = await getApplicationSupportDirectory();
+      databasesPath = '${directory.path}/databases';
+    }
+    if (directory != null) {
+      await lg.init(saveToFile: true, directory: directory);
+    }
 
+    String path = join(databasesPath, _config!.dbName);
     return await openDatabase(
       path,
       password: _config!.password,

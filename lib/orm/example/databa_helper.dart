@@ -25,6 +25,10 @@ class DatabaseHelper {
     return _db!;
   }
 
+  Future<String> getDatabasePath(Database db) async {
+    return db.path;
+  }
+
   Future<Database> _initDatabase() async {
     // Definimos esquemas intermedios o adicionales aquí para mantener limpia la UI
     final userRolesSchema = TableSchema(
@@ -39,7 +43,7 @@ class DatabaseHelper {
           referenceTable: 'users',
           referenceColumn: 'id',
           onDelete: 'CASCADE',
-        )
+        ),
       ],
       uniqueTogether: ['user_id', 'role_name'],
     );
@@ -47,13 +51,13 @@ class DatabaseHelper {
     // Inicialización centralizada del ORM
     return await DatabaseManager().initialize(
       DatabaseConfig(
-        dbName: 'app_database.db', 
+        dbName: 'app_database.db',
         version: 6, // Incrementamos para agregar metadata a users
         password: 'secure_sqlcipher_key',
         tables: [
-          userRolesSchema, 
-          User.tableSchema, 
-          Post.tableSchema, 
+          userRolesSchema,
+          User.tableSchema,
+          Post.tableSchema,
           Comment.tableSchema,
           Category.tableSchema,
           Product.tableSchema,
@@ -61,7 +65,9 @@ class DatabaseHelper {
         ],
         onUpgrade: (db, oldVersion, newVersion) async {
           if (oldVersion < 4) {
-            await db.execute('ALTER TABLE posts ADD COLUMN is_active INTEGER DEFAULT 1');
+            await db.execute(
+              'ALTER TABLE posts ADD COLUMN is_active INTEGER DEFAULT 1',
+            );
           }
           if (oldVersion < 6) {
             // Aseguramos que 'metadata' exista en users si es una base de datos vieja
@@ -72,14 +78,19 @@ class DatabaseHelper {
             }
           }
         },
-      )
+      ),
     );
   }
 
   // Helpers para obtener Repositorios sin configurar nada en la UI
-  Repository<User> get users => Repository<User>(User.tableSchema, User.fromMap);
-  Repository<Post> get posts => Repository<Post>(Post.tableSchema, Post.fromMap);
-  Repository<Category> get categories => Repository<Category>(Category.tableSchema, Category.fromMap);
-  Repository<Product> get products => Repository<Product>(Product.tableSchema, Product.fromMap);
-  Repository<Profile> get profiles => Repository<Profile>(Profile.tableSchema, Profile.fromMap);
+  Repository<User> get users =>
+      Repository<User>(User.tableSchema, User.fromMap);
+  Repository<Post> get posts =>
+      Repository<Post>(Post.tableSchema, Post.fromMap);
+  Repository<Category> get categories =>
+      Repository<Category>(Category.tableSchema, Category.fromMap);
+  Repository<Product> get products =>
+      Repository<Product>(Product.tableSchema, Product.fromMap);
+  Repository<Profile> get profiles =>
+      Repository<Profile>(Profile.tableSchema, Profile.fromMap);
 }
