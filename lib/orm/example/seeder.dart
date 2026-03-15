@@ -2,7 +2,6 @@ import 'package:ui/orm/example/databa_helper.dart';
 import 'package:ui/orm/example/user.dart';
 import 'package:ui/orm/example/category.dart';
 import 'package:ui/orm/example/product.dart';
-import 'package:ui/orm/example/post.dart';
 import 'package:ui/orm/example/profile.dart';
 
 class DatabaseSeed {

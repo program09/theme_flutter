@@ -1,17 +1,20 @@
 import 'package:sqflite_sqlcipher/sqflite.dart';
 import 'field.dart';
 import 'foreign_key.dart';
+import 'relation.dart';
 
 class TableSchema {
   final String tableName;
   final List<Field> fields;
   final List<ForeignKey> foreignKeys;
   final List<List<String>> uniqueTogether;
+  final List<Relation> relations;
 
   TableSchema({
     required this.tableName,
     required this.fields,
     this.foreignKeys = const [],
+    this.relations = const [],
     dynamic uniqueTogether = const [],
   }) : uniqueTogether = _normalizeUniqueTogether(uniqueTogether);
 

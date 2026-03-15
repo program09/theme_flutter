@@ -14,8 +14,13 @@ class Repository<T extends Model> {
   Future<DatabaseExecutor> get _db async =>
       executor ?? await DatabaseManager().database;
 
-  QueryBuilder get query {
-    final q = QueryBuilder(tableSchema.tableName, executor: executor);
+  QueryBuilder<T> get query {
+    final q = QueryBuilder<T>(
+      tableSchema.tableName,
+      executor: executor,
+      factory: fromMap,
+      tableSchema: tableSchema,
+    );
     // Automatically filter out soft-deleted items if the column exists
     if (tableSchema.fields.any((f) => f.name == 'deleted_at')) {
       q.whereRaw('deleted_at IS NULL', []);
@@ -23,9 +28,19 @@ class Repository<T extends Model> {
     return q;
   }
 
+  /// Start a query with relations
+  QueryBuilder<T> include(dynamic relations) => query.include(relations);
+  
+  /// Alias for include
+  QueryBuilder<T> with_(dynamic relations) => query.include(relations);
+
   /// Get query builder including soft-deleted items
-  QueryBuilder get queryWithTrashed =>
-      QueryBuilder(tableSchema.tableName, executor: executor);
+  QueryBuilder<T> get queryWithTrashed => QueryBuilder<T>(
+        tableSchema.tableName,
+        executor: executor,
+        factory: fromMap,
+        tableSchema: tableSchema,
+      );
 
   Future<int> insert(T item) async {
     final map = item.toMap();
@@ -40,16 +55,12 @@ class Repository<T extends Model> {
   }
 
   Future<List<T>> findAll() async {
-    final results = await query.get();
-    return results
-        .map((map) => fromMap(Map<String, dynamic>.from(map)))
-        .toList();
+    return await query.findAll();
   }
 
   Future<T?> findById(dynamic id) async {
     final pkField = tableSchema.fields.firstWhere((f) => f.isPrimaryKey);
-    final result = await query.where(pkField.name, id).first();
-    return result != null ? fromMap(Map<String, dynamic>.from(result)) : null;
+    return await query.where(pkField.name, id).firstModel();
   }
 
   Future<List<T>> findWhere(
@@ -57,10 +68,12 @@ class Repository<T extends Model> {
     dynamic value, {
     String operator = '=',
   }) async {
-    final results = await query.where(column, value, operator: operator).get();
-    return results
-        .map((map) => fromMap(Map<String, dynamic>.from(map)))
-        .toList();
+    return await query.where(column, value, operator: operator).findAll();
+  }
+
+  /// Execute query and load relations
+  Future<List<T>> find(QueryBuilder<T> q) async {
+    return await q.findAll();
   }
 
   Future<int> count({String? where, List<dynamic>? whereArgs}) async {
@@ -79,7 +92,6 @@ class Repository<T extends Model> {
     return (rows.first['cnt'] as int?) ?? 0;
   }
 
-  /// Update an item. If [fields] is provided, only those fields are updated.
   Future<int> update(T item, {List<String>? fields}) async {
     final pkField = tableSchema.fields.firstWhere((f) => f.isPrimaryKey);
     var map = item.toMap();
@@ -100,7 +112,6 @@ class Repository<T extends Model> {
     return await queryWithTrashed.where(pkField.name, pkValue).update(map);
   }
 
-  /// Delete an item by ID
   Future<int> delete(dynamic id) async {
     final pkField = tableSchema.fields.firstWhere((f) => f.isPrimaryKey);
     return await queryWithTrashed.where(pkField.name, id).delete();
@@ -114,20 +125,14 @@ class Repository<T extends Model> {
     return await queryWithTrashed.whereRaw(where, args).delete();
   }
 
-  Future<int> deleteWhereRaw(
-    String where, [
-    List<dynamic> args = const [],
-  ]) async {
+  Future<int> deleteWhereRaw(String where, [List<dynamic> args = const []]) async {
     return await deleteWhere(where, args);
   }
 
-  /// Soft delete an item by assigning deleted_at
   Future<int> softDelete(dynamic id) async {
     final pkField = tableSchema.fields.firstWhere((f) => f.isPrimaryKey);
     if (!tableSchema.fields.any((f) => f.name == 'deleted_at')) {
-      throw Exception(
-        'Table does not support soft delete (missing deleted_at column)',
-      );
+      throw Exception('Table does not support soft delete (missing deleted_at column)');
     }
     return await queryWithTrashed.where(pkField.name, id).update({
       'deleted_at': DateTime.now().toIso8601String(),
@@ -143,10 +148,7 @@ class Repository<T extends Model> {
     });
   }
 
-  Future<int> softDeleteWhere(
-    String where, [
-    List<dynamic> args = const [],
-  ]) async {
+  Future<int> softDeleteWhere(String where, [List<dynamic> args = const []]) async {
     if (!tableSchema.fields.any((f) => f.name == 'deleted_at')) {
       throw Exception('Table does not support soft delete');
     }
@@ -155,10 +157,7 @@ class Repository<T extends Model> {
     });
   }
 
-  Future<int> softDeleteWhereRaw(
-    String where, [
-    List<dynamic> args = const [],
-  ]) async {
+  Future<int> softDeleteWhereRaw(String where, [List<dynamic> args = const []]) async {
     return await softDeleteWhere(where, args);
   }
 }

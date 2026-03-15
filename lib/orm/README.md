@@ -126,6 +126,8 @@ final posts = await QueryBuilder('posts')
     .where('posts.is_active', 1)
     .orderBy('posts.created_at', descending: true)
     .get();
+
+// Para más detalles, consulta la [Guía del Query Builder](file:///Users/yordialcantarapaico/Develop/theme_flutter/lib/orm/query_builder.md).
 ```
 
 ---

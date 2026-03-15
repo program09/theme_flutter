@@ -2,6 +2,9 @@ import 'dart:convert';
 import '../models/model.dart';
 import '../schema/table_schema.dart';
 import '../schema/field.dart';
+import '../schema/relation.dart';
+import 'post.dart';
+import 'profile.dart';
 
 class User extends Model {
   final int? id;
@@ -10,6 +13,10 @@ class User extends Model {
   final bool isActive;
   final Map<String, dynamic>? metadata;
   final DateTime? createdAt;
+  
+  // Relations
+  final List<Post>? posts;
+  final Profile? profile;
 
   User.empty() : this(name: '', age: 0, isActive: false, createdAt: null);
 
@@ -20,6 +27,8 @@ class User extends Model {
     this.isActive = true,
     this.metadata,
     this.createdAt,
+    this.posts,
+    this.profile,
   });
 
   static TableSchema get tableSchema => TableSchema(
@@ -31,6 +40,20 @@ class User extends Model {
           Field.integer('is_active', isNullable: false),
           Field.json('metadata'),
           Field.text('created_at', isNullable: true),
+        ],
+        relations: [
+          Relation.hasMany(
+            name: 'posts',
+            targetSchema: () => Post.tableSchema,
+            foreignKey: 'user_id',
+            fromMap: (map) => Post.fromMap(map),
+          ),
+          Relation.hasOne(
+            name: 'profile',
+            targetSchema: () => Profile.tableSchema,
+            foreignKey: 'userId',
+            fromMap: (map) => Profile.fromMap(map),
+          ),
         ],
       );
 
@@ -57,6 +80,8 @@ class User extends Model {
       isActive: (map['is_active'] as int) == 1,
       metadata: map['metadata'] != null ? jsonDecode(map['metadata'] as String) as Map<String, dynamic> : null,
       createdAt: map['created_at'] != null ? DateTime.parse(map['created_at'] as String) : null,
+      posts: (map['posts'] as List?)?.map((p) => Post.fromMap(Map<String, dynamic>.from(p))).toList(),
+      profile: map['profile'] != null ? Profile.fromMap(Map<String, dynamic>.from(map['profile'])) : null,
     );
   }
 }

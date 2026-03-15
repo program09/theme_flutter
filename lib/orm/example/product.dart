@@ -3,6 +3,8 @@ import '../models/model.dart';
 import '../schema/table_schema.dart';
 import '../schema/field.dart';
 import '../schema/foreign_key.dart';
+import '../schema/relation.dart';
+import 'category.dart';
 
 class Product extends Model {
   final int? id;
@@ -10,8 +12,11 @@ class Product extends Model {
   final double price;
   final int categoryId;
   final Map<String, dynamic>? metadata;
+  
+  // Relations
+  final Category? category;
 
-  Product({this.id, required this.name, required this.price, required this.categoryId, this.metadata});
+  Product({this.id, required this.name, required this.price, required this.categoryId, this.metadata, this.category});
 
   static TableSchema get tableSchema => TableSchema(
     tableName: 'products',
@@ -29,6 +34,14 @@ class Product extends Model {
         referenceColumn: 'id',
         onDelete: 'CASCADE',
       )
+    ],
+    relations: [
+      Relation.belongsTo(
+        name: 'category',
+        targetSchema: () => Category.tableSchema,
+        foreignKey: 'category_id',
+        fromMap: (map) => Category.fromMap(map),
+      ),
     ],
   );
 
@@ -50,5 +63,6 @@ class Product extends Model {
     price: (map['price'] as num).toDouble(),
     categoryId: map['category_id'] as int,
     metadata: map['metadata'] != null ? jsonDecode(map['metadata'] as String) as Map<String, dynamic> : null,
+    category: map['category'] != null ? Category.fromMap(Map<String, dynamic>.from(map['category'])) : null,
   );
 }

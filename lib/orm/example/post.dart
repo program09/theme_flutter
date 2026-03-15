@@ -2,12 +2,15 @@ import '../models/model.dart';
 import '../schema/table_schema.dart';
 import '../schema/field.dart';
 import '../schema/foreign_key.dart';
+import '../schema/relation.dart';
+import 'user.dart';
 
 class Post extends Model {
   final int? id;
   final int userId;
   final String title;
   final String content;
+  final User? user;
 
   Post.empty() : this(userId: 0, title: '', content: '');
 
@@ -16,6 +19,7 @@ class Post extends Model {
     required this.userId,
     required this.title,
     required this.content,
+    this.user,
   });
 
   static TableSchema get tableSchema => TableSchema(
@@ -35,8 +39,16 @@ class Post extends Model {
           )
         ],
         uniqueTogether: [
-          ['user_id', 'title'], // A user cannot have two posts with exactly the same title
-        ]
+          ['user_id', 'title'],
+        ],
+        relations: [
+          Relation.belongsTo(
+            name: 'user',
+            targetSchema: () => User.tableSchema,
+            foreignKey: 'user_id',
+            fromMap: (map) => User.fromMap(map),
+          ),
+        ],
       );
 
   @override
@@ -58,6 +70,7 @@ class Post extends Model {
       userId: map['user_id'] as int,
       title: map['title'] as String,
       content: map['content'] as String,
+      user: map['user'] != null ? User.fromMap(Map<String, dynamic>.from(map['user'])) : null,
     );
   }
 }

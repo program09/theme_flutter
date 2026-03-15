@@ -2,14 +2,17 @@ import '../models/model.dart';
 import '../schema/table_schema.dart';
 import '../schema/field.dart';
 import '../schema/foreign_key.dart';
+import '../schema/relation.dart';
+import 'user.dart';
 
 class Profile extends Model {
   final int? id;
   final int userId;
   final String bio;
   final String? location; // Store as Point string or JSON
+  final User? user;
 
-  Profile({this.id, required this.userId, required this.bio, this.location});
+  Profile({this.id, required this.userId, required this.bio, this.location, this.user});
 
   static TableSchema get tableSchema => TableSchema(
     tableName: 'profiles',
@@ -26,6 +29,14 @@ class Profile extends Model {
         referenceColumn: 'id',
         onDelete: 'CASCADE',
       )
+    ],
+    relations: [
+      Relation.belongsTo(
+        name: 'user',
+        targetSchema: () => User.tableSchema,
+        foreignKey: 'userId',
+        fromMap: (map) => User.fromMap(map),
+      ),
     ],
   );
 
@@ -45,5 +56,6 @@ class Profile extends Model {
     userId: map['userId'] as int,
     bio: map['bio'] as String,
     location: map['location'] as String?,
+    user: map['user'] != null ? User.fromMap(Map<String, dynamic>.from(map['user'])) : null,
   );
 }

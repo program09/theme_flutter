@@ -28,29 +28,51 @@ class _OrmDemoScreenState extends State<OrmDemoScreen> {
   @override
   void initState() {
     super.initState();
-    _loadData();
-  }
-
-  Future<void> _loadData() async {
-    setState(() => isLoading = true);
-    await DatabaseHelper().database;
-
+    // Initialize repositories immediately to avoid LateInitializationError
     userRepository = DatabaseHelper().users;
     postRepository = DatabaseHelper().posts;
     categoryRepository = DatabaseHelper().categories;
     productRepository = DatabaseHelper().products;
+    
+    _loadData();
+  }
 
-    await _refreshUsers();
+  Future<void> _loadData() async {
+    print('ORM Demo: Loading data...');
+    try {
+      setState(() => isLoading = true);
+      final db = await DatabaseHelper().database;
+      print('ORM Demo: Database initialized: ${db.path}');
+
+      print('ORM Demo: Refreshing users...');
+      await _refreshUsers();
+      print('ORM Demo: Initial load complete.');
+    } catch (e, stack) {
+      print('ORM ERROR in _loadData: $e');
+      print(stack);
+      setState(() => isLoading = false);
+    }
   }
 
   Future<void> _refreshUsers() async {
-    setState(() => isLoading = true);
-    final allUsers = await userRepository.findAll();
-    setState(() {
-      users = allUsers;
-      currentView = 'Users';
-      isLoading = false;
-    });
+    print('ORM Demo: Refreshing users...');
+    try {
+      setState(() => isLoading = true);
+      // EJEMPLO: Eager Loading de posts y perfil
+      final query = userRepository.include(['posts', 'profile']);
+      print('ORM Demo: Executing query with relations...');
+      final allUsers = await userRepository.find(query);
+      print('ORM Demo: Found ${allUsers.length} users.');
+      
+      setState(() {
+        users = allUsers;
+        currentView = 'Users';
+        isLoading = false;
+      });
+    } catch (e) {
+      print('ORM ERROR in _refreshUsers: $e');
+      setState(() => isLoading = false);
+    }
   }
 
   // --- Operaciones CRUD Practicas ---
@@ -78,8 +100,14 @@ class _OrmDemoScreenState extends State<OrmDemoScreen> {
     setState(() => isLoading = true);
     // EJEMPLO: Join entre Productos y Categorías filtrando por precio
     final results = await productRepository.query
-        .select(['products.name', 'products.price', 'categories.name as cat_name'])
-        .addSelect('CASE WHEN products.price > 200 THEN "Expensive" ELSE "Cheap" END as price_category')
+        .select([
+          'products.name',
+          'products.price',
+          'categories.name as cat_name',
+        ])
+        .addSelect(
+          'CASE WHEN products.price > 200 THEN "Expensive" ELSE "Cheap" END as price_category',
+        )
         .innerJoin('categories', 'categories.id = products.category_id')
         .where('products.price', 100, operator: '>')
         .orderBy('products.price', descending: true)
@@ -120,13 +148,27 @@ class _OrmDemoScreenState extends State<OrmDemoScreen> {
         backgroundColor: Colors.indigo,
         foregroundColor: Colors.white,
         actions: [
-          IconButton(icon: const Icon(Icons.auto_awesome), onPressed: _runSeeder, tooltip: 'Seed'),
-          IconButton(icon: const Icon(Icons.delete_forever), onPressed: _clearAll, tooltip: 'Clear'),
+          IconButton(
+            icon: const Icon(Icons.auto_awesome),
+            onPressed: _runSeeder,
+            tooltip: 'Seed',
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete_forever),
+            onPressed: _clearAll,
+            tooltip: 'Clear',
+          ),
         ],
       ),
       body: Column(
         children: [
-          _buildToolBar(),
+          IgnorePointer(
+            ignoring: isLoading,
+            child: Opacity(
+              opacity: isLoading ? 0.5 : 1.0,
+              child: _buildToolBar(),
+            ),
+          ),
           const Divider(height: 1),
           Expanded(
             child: isLoading
@@ -150,23 +192,70 @@ class _OrmDemoScreenState extends State<OrmDemoScreen> {
           _navButton('Joins', 'Joins', _testComplexJoin, Icons.link),
           _navButton('Filtros', 'Filters', _testFilters, Icons.filter_alt),
           _navButton('RAW SQL', 'Raw', () async {
-            final raw = await userRepository.query.raw('SELECT name, age FROM users LIMIT 5');
+            final raw = await userRepository.query.raw(
+              'SELECT name, age FROM users LIMIT 5',
+            );
             setState(() {
               rawResults = raw;
               currentView = 'Raw';
             });
           }, Icons.code),
+          _navButton('Rel-Advanced', 'Rel-Adv', () async {
+            setState(() => isLoading = true);
+            // EJEMPLO: Eager Loading con filtrado y selección de columnas personalizada
+            final results = await userRepository.include({
+              'posts': (q) => q.select(['title', 'user_id']).limit(1), // Solo un post y solo estos campos
+              'profile': (q) => q.select(['bio', 'userId']),
+            }).findAll();
+            
+            setState(() {
+              rawResults = results.map((u) => {
+                'user': u.name,
+                'posts_count': u.posts?.length ?? 0,
+                'first_post': u.posts?.isNotEmpty == true ? u.posts!.first.title : 'N/A',
+                'bio': u.profile?.bio ?? 'N/A',
+              }).toList();
+              currentView = 'Rel-Adv';
+              isLoading = false;
+            });
+          }, Icons.settings_input_component),
+          _navButton('Posts + User', 'Rel-Posts', () async {
+            setState(() => isLoading = true);
+            // EJEMPLO: Carga inversa (Post -> User)
+            final results = await postRepository.include(['user']).findAll();
+            setState(() {
+              rawResults = results
+                  .map(
+                    (p) => {
+                      'title': p.title,
+                      'author': p.user?.name ?? 'Unknown',
+                    },
+                  )
+                  .toList();
+              currentView = 'Rel-Posts';
+              isLoading = false;
+            });
+          }, Icons.account_tree),
         ],
       ),
     );
   }
 
-  Widget _navButton(String label, String view, VoidCallback action, IconData icon) {
+  Widget _navButton(
+    String label,
+    String view,
+    VoidCallback action,
+    IconData icon,
+  ) {
     final active = currentView == view;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4),
       child: ActionChip(
-        avatar: Icon(icon, size: 16, color: active ? Colors.white : Colors.indigo),
+        avatar: Icon(
+          icon,
+          size: 16,
+          color: active ? Colors.white : Colors.indigo,
+        ),
         label: Text(label),
         backgroundColor: active ? Colors.indigo : Colors.white,
         labelStyle: TextStyle(color: active ? Colors.white : Colors.indigo),
@@ -183,12 +272,32 @@ class _OrmDemoScreenState extends State<OrmDemoScreen> {
           final u = users[i];
           return ListTile(
             title: Text('${u.name} (ID: ${u.id})'),
-            subtitle: Text('Age: ${u.age} | Meta: ${u.metadata}'),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Age: ${u.age} | Profile: ${u.profile?.bio ?? "No Bio"}'),
+                Text(
+                  'Posts: ${u.posts?.length ?? 0} count',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue,
+                  ),
+                ),
+              ],
+            ),
             trailing: IconButton(
               icon: const Icon(Icons.edit),
               onPressed: () async {
-                final updated = User(id: u.id, name: '${u.name} (Mod)', age: u.age + 1, metadata: u.metadata);
-                await userRepository.update(updated, fields: ['name', 'age']); // Partial Update
+                final updated = User(
+                  id: u.id,
+                  name: '${u.name} (Mod)',
+                  age: u.age + 1,
+                  metadata: u.metadata,
+                );
+                await userRepository.update(
+                  updated,
+                  fields: ['name', 'age'],
+                ); // Partial Update
                 _refreshUsers();
               },
             ),
