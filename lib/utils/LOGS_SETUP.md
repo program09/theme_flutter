@@ -44,7 +44,17 @@ Recuerda inicializar los bindings antes de configurar el logger:
 ```dart
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await lg.init(saveToFile: true); 
-  runApp(const MyApp());
+
+  Directory? directory;
+  if (Platform.isAndroid) {
+    directory = await getExternalStorageDirectory();
+  } else if (Platform.isIOS) {
+    // En iOS usamos Documents para que sea visible en la app "Archivos"
+    directory = await getApplicationDocumentsDirectory();
+  }
+  if (directory != null) {
+    await lg.init(saveToFile: true, directory: directory);
+  }
+  runApp(const MainApp());
 }
 ```
