@@ -1,11 +1,8 @@
-// PATH PROVIDER: https://pub.dev/packages/path_provider
-// flutter pub add path_provider
-
 import 'dart:developer' as developer;
 import 'dart:io';
 import 'dart:async';
+import 'dart:collection';
 import 'package:flutter/foundation.dart' show kDebugMode;
-import 'package:path_provider/path_provider.dart';
 
 enum LogLevel { success, debug, info, warning, error, fatal }
 
@@ -13,37 +10,42 @@ class FastLogger {
   static final FastLogger _instance = FastLogger._internal();
   factory FastLogger() => _instance;
 
-  FastLogger._internal() {
-    _writeController.stream.listen(_processWriteQueue);
-  }
+  FastLogger._internal();
 
   bool debugMode = kDebugMode;
   bool _saveToFile = false;
   File? _logFile;
+
+  // Resource optimization constants
   static const int _maxFileSize = 5 * 1024 * 1024;
-  final List<String> _writeQueue = [];
+  static const int _maxQueueSize = 1000; // Prevent memory leak by capping queue
+
+  // Use ListQueue for efficient O(1) removal from front
+  final ListQueue<String> _writeQueue = ListQueue<String>();
   bool _isWriting = false;
-  final _writeController = StreamController<String>.broadcast();
 
   static const _reset = '\x1B[0m';
-  static const _orange = '\x1B[38;5;208m';
+  static const _orange = '\x1B[38;5;215m';
   static const _green = '\x1B[32m';
   static const _blue = '\x1B[34m';
   static const _yellow = '\x1B[33m';
   static const _red = '\x1B[31m';
   static const _magenta = '\x1B[35m';
 
-  Future<void> init({bool saveToFile = false}) async {
+  Future<void> init({
+    required Directory directory,
+    bool saveToFile = false
+    }) async {
     _saveToFile = saveToFile;
     if (_saveToFile) {
-      await _initLogFile();
+      await _initLogFile(directory: directory);
     }
   }
 
-  Future<void> _initLogFile() async {
+  Future<void> _initLogFile({required Directory directory}) async {
     try {
-      final directory = await getExternalStorageDirectory();
-      final logDir = Directory('${directory?.path}/logs');
+
+      final logDir = Directory('${directory.path}/logs');
       if (!await logDir.exists()) {
         await logDir.create(recursive: true);
       }
@@ -54,8 +56,9 @@ class FastLogger {
       final y = now.year;
       final h = now.hour.toString().padLeft(2, '0');
 
-      final fileName = 'app_D${d}_${m}_${y}___H$h.log';
-      _logFile = File('${logDir.path}/$fileName');
+      final fileName = 'log_D${d}_${m}_${y}___H$h.log';
+      final path = '${logDir.path}/$fileName';
+      _logFile = File(path);
 
       if (await _logFile!.exists()) {
         final size = await _logFile!.length();
@@ -66,7 +69,7 @@ class FastLogger {
         }
       }
     } catch (e) {
-      // Silencioso
+      // Silent on init errors
     }
   }
 
@@ -79,23 +82,16 @@ class FastLogger {
     final color = _getColor(level);
     final label = level.toString().split('.').last.toUpperCase();
 
-    final timeStr = _getCurrentTime();
-    final moduleStr = (module != null && module.isNotEmpty)
-        ? '[$module]'
-        : '[$label]';
-    final logMessage = '$timeStr $moduleStr => $message';
-
+    // In debug mode, we print to console immediately
     if (debugMode) {
       final buffer = StringBuffer();
-
       if (module != null && module.isNotEmpty) {
         buffer.write('$color[$module]$_reset');
       } else {
         buffer.write('$color[$label]$_reset');
       }
-
       buffer.write('$color => $message$_reset');
-      
+
       developer.log(
         buffer.toString(),
         name: module ?? label,
@@ -104,16 +100,63 @@ class FastLogger {
       );
     }
 
+    // Optimization: Add to queue and trigger asynchronous write
     if (_saveToFile && _logFile != null) {
-      String fileMessage = logMessage;
+      // Memory safety: Drop logs if queue is too large
+      if (_writeQueue.length >= _maxQueueSize) {
+        _writeQueue.removeFirst();
+      }
+
+      final timeStr = _getCurrentTime();
+      final moduleStr = (module != null && module.isNotEmpty)
+          ? '[$module]'
+          : '[$label]';
+      var logMessage = '$timeStr $moduleStr => $message';
+
       if (stack != null &&
           (level == LogLevel.error || level == LogLevel.fatal)) {
         final stackLines = stack.toString().split('\n').take(2).join(' | ');
-        fileMessage += '\n  Stack: $stackLines';
+        logMessage += '\n  Stack: $stackLines';
       }
 
-      _writeQueue.add(fileMessage);
-      _writeController.add('');
+      _writeQueue.add(logMessage);
+
+      // Schedule background write if not already running
+      if (!_isWriting) {
+        _scheduleWrite();
+      }
+    }
+  }
+
+  void _scheduleWrite() {
+    _isWriting = true;
+    // Use microtask to batch logs that occur in the same frame
+    scheduleMicrotask(_processWriteQueue);
+  }
+
+  Future<void> _processWriteQueue() async {
+    if (_writeQueue.isEmpty || _logFile == null) {
+      _isWriting = false;
+      return;
+    }
+
+    try {
+      // Optimization: Batch write all currently queued logs in one I/O operation
+      final buffer = StringBuffer();
+      while (_writeQueue.isNotEmpty) {
+        buffer.writeln(_writeQueue.removeFirst());
+      }
+
+      await _logFile!.writeAsString(buffer.toString(), mode: FileMode.append);
+    } catch (e) {
+      // Silent on write errors to avoid recursive logging loops
+    } finally {
+      // If new logs arrived during the write, reschedule
+      if (_writeQueue.isNotEmpty) {
+        _scheduleWrite();
+      } else {
+        _isWriting = false;
+      }
     }
   }
 
@@ -132,23 +175,6 @@ class FastLogger {
       case LogLevel.fatal:
         return 1200;
     }
-  }
-
-  Future<void> _processWriteQueue(_) async {
-    if (_isWriting || _writeQueue.isEmpty || _logFile == null) return;
-
-    _isWriting = true;
-
-    while (_writeQueue.isNotEmpty) {
-      final line = _writeQueue.removeAt(0);
-      try {
-        await _logFile!.writeAsString('$line\n', mode: FileMode.append);
-      } catch (e) {
-        // Ignorar error
-      }
-    }
-
-    _isWriting = false;
   }
 
   String _getCurrentTime() {
@@ -181,7 +207,6 @@ class FastLogger {
       _log(LogLevel.info, msg, module);
   void w({String? module, required String msg}) =>
       _log(LogLevel.warning, msg, module);
-
   void e({String? module, required String msg, StackTrace? stack}) =>
       _log(LogLevel.error, msg, module, stack);
   void f({String? module, required String msg, StackTrace? stack}) =>

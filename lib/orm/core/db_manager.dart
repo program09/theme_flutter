@@ -41,7 +41,7 @@ class DatabaseManager {
         // If it was set externally, we still ensure tables exist
         await _createTables(_database!);
       }
-      
+
       if (!_initCompleter.isCompleted) _initCompleter.complete();
       return _database!;
     } catch (e) {
@@ -81,7 +81,7 @@ class DatabaseManager {
 
   Future<Database> _initDatabase() async {
     final databasesPath = await getDatabasesPath();
-    final path = join(databasesPath, _config!.dbName);
+    String path = join(databasesPath, _config!.dbName);
 
     return await openDatabase(
       path,
@@ -113,7 +113,6 @@ class DatabaseManager {
         schema.addTimestamps();
       }
       final sql = schema.createTableSql();
-      print('ORM: Ensuring table exists: ${schema.tableName}');
       await db.execute(sql);
     }
   }

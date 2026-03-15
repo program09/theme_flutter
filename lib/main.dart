@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ui/examples/example.dart';
@@ -6,9 +8,21 @@ import 'package:ui/routers/go.dart';
 import 'package:ui/ui/theme.dart';
 import 'package:ui/utils/logs.dart';
 
+import 'package:path_provider/path_provider.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await lg.init(saveToFile: true);
+
+  Directory? directory;
+  if (Platform.isAndroid) {
+    directory = await getExternalStorageDirectory();
+  } else if (Platform.isIOS) {
+    // En iOS usamos Documents para que sea visible en la app "Archivos"
+    directory = await getApplicationDocumentsDirectory();
+  }
+  if (directory != null) {
+    await lg.init(saveToFile: true, directory: directory);
+  }
   runApp(const MainApp());
 }
 
@@ -42,8 +56,12 @@ class _HomeScreenState extends State<HomeScreen> {
     // Pasamos parámetrosdinámicos a la ruta
     final result = await Go.to(route: Routes.example, args: {'id': 123});
 
-
-    lg.s(msg: 'Usuario autenticado', module: 'AUTH');
+    lg.s(msg: 'Usuario autenticado1', module: 'AUTH');
+    lg.d(msg: 'Usuario autenticado2', module: 'AUTH');
+    lg.i(msg: 'Usuario autenticado3', module: 'AUTH');
+    lg.w(msg: 'Usuario autenticado4', module: 'AUTH');
+    lg.e(msg: 'Usuario autenticado5', module: 'AUTH');
+    lg.f(msg: 'Usuario autenticado6', module: 'AUTH');
 
     print(result);
 
@@ -69,9 +87,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
             const SizedBox(height: 12),
             ElevatedButton.icon(
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const OrmDemoScreen()),
-              ),
+              onPressed: () => Navigator.of(
+                context,
+              ).push(MaterialPageRoute(builder: (_) => const OrmDemoScreen())),
               icon: const Icon(Icons.storage),
               label: const Text('Ir a ORM Demo'),
             ),
