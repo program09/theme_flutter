@@ -4,8 +4,11 @@ import 'package:ui/examples/example.dart';
 import 'package:ui/orm/example/orm_demo_screen.dart';
 import 'package:ui/routers/go.dart';
 import 'package:ui/ui/theme.dart';
+import 'package:ui/utils/logs.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await lg.init(saveToFile: true);
   runApp(const MainApp());
 }
 
@@ -38,6 +41,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _irAExample() async {
     // Pasamos parámetrosdinámicos a la ruta
     final result = await Go.to(route: Routes.example, args: {'id': 123});
+
+
+    lg.s(msg: 'Usuario autenticado', module: 'AUTH');
 
     print(result);
 

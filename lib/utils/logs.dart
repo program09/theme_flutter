@@ -1,6 +1,7 @@
 // PATH PROVIDER: https://pub.dev/packages/path_provider
 // flutter pub add path_provider
 
+import 'dart:developer' as developer;
 import 'dart:io';
 import 'dart:async';
 import 'package:flutter/foundation.dart' show kDebugMode;
@@ -94,24 +95,13 @@ class FastLogger {
       }
 
       buffer.write('$color => $message$_reset');
-      print(buffer.toString());
-
-      if (stack != null &&
-          (level == LogLevel.error || level == LogLevel.fatal)) {
-        print(
-          '$color════════════════════════════════════════════════════════════════════════════════════════════════════$_reset',
-        );
-
-        final stackLines = stack.toString().split('\n').take(3);
-        for (var line in stackLines) {
-          print('$color  $line$_reset');
-        }
-
-        print(
-          '$color════════════════════════════════════════════════════════════════════════════════════════════════════$_reset',
-        );
-      }
-      print('');
+      
+      developer.log(
+        buffer.toString(),
+        name: module ?? label,
+        level: _getDeveloperLevel(level),
+        stackTrace: stack,
+      );
     }
 
     if (_saveToFile && _logFile != null) {
@@ -124,6 +114,23 @@ class FastLogger {
 
       _writeQueue.add(fileMessage);
       _writeController.add('');
+    }
+  }
+
+  int _getDeveloperLevel(LogLevel level) {
+    switch (level) {
+      case LogLevel.success:
+        return 0;
+      case LogLevel.debug:
+        return 500;
+      case LogLevel.info:
+        return 800;
+      case LogLevel.warning:
+        return 900;
+      case LogLevel.error:
+        return 1000;
+      case LogLevel.fatal:
+        return 1200;
     }
   }
 
