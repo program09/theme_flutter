@@ -9,6 +9,7 @@ import 'package:ui/main.dart';
 import 'package:ui/routers/go.dart';
 import 'package:ui/routers/go_error.dart';
 import 'package:ui/ui/forms.dart';
+import 'package:ui/camera_demo_screen.dart';
 
 // -------------------- USE EXAMPLE -------------------------
 
@@ -20,6 +21,7 @@ class Routes {
 
   static const String home = '/';
   static const String example = '/example';
+  static const String camera = '/camera';
 }
 
 // ─────────────────────────────────────────
@@ -68,6 +70,11 @@ class AppPages {
         );
       },
       transition: Transition.fadeIn,
+    ),
+    GetPage(
+      name: Routes.camera,
+      page: () => const CameraDemoScreen(),
+      transition: Transition.rightToLeftWithFade,
     ),
   ];
 }

@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:encrypt/encrypt.dart' as enc;
+import 'package:flutter/foundation.dart';
 
 enum TypeDirectory { external, public, private, cache }
 
@@ -154,5 +156,76 @@ class FileManager {
 
   static Future<File?> getFile({required String path}) async {
     return File(path);
+  }
+
+  // --- Encryption / Decryption ---
+
+  static Future<File?> encryptFile({
+    required File file,
+    required String key,
+    required String iv,
+  }) async {
+    try {
+      if (!await file.exists()) return null;
+      final bytes = await file.readAsBytes();
+
+      final encryptedBytes = await compute(
+        _processCipher,
+        _CipherData(bytes: bytes, key: key, iv: iv, isEncrypt: true),
+      );
+
+      return await file.writeAsBytes(encryptedBytes);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  static Future<File?> decryptFile({
+    required File file,
+    required String key,
+    required String iv,
+  }) async {
+    try {
+      if (!await file.exists()) return null;
+      final bytes = await file.readAsBytes();
+
+      final decryptedBytes = await compute(
+        _processCipher,
+        _CipherData(bytes: bytes, key: key, iv: iv, isEncrypt: false),
+      );
+
+      return await file.writeAsBytes(decryptedBytes);
+    } catch (e) {
+      return null;
+    }
+  }
+}
+
+// Helper class for Isolate communication
+class _CipherData {
+  final Uint8List bytes;
+  final String key;
+  final String iv;
+  final bool isEncrypt;
+
+  _CipherData({
+    required this.bytes,
+    required this.key,
+    required this.iv,
+    required this.isEncrypt,
+  });
+}
+
+// Background processing for encryption/decryption
+List<int> _processCipher(_CipherData data) {
+  // AES-256 requires 32 chars key
+  final key = enc.Key.fromUtf8(data.key.padRight(32).substring(0, 32));
+  final iv = enc.IV.fromUtf8(data.iv.padRight(16).substring(0, 16));
+  final encrypter = enc.Encrypter(enc.AES(key));
+
+  if (data.isEncrypt) {
+    return encrypter.encryptBytes(data.bytes, iv: iv).bytes;
+  } else {
+    return encrypter.decryptBytes(enc.Encrypted(data.bytes), iv: iv);
   }
 }

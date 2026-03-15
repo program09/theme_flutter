@@ -17,6 +17,8 @@ dependencies:
   sqflite_sqlcipher: ^3.4.0
   path: ^1.8.3
   workmanager: ^0.9.0+3
+  encrypt: ^5.0.3
+  image_picker: ^1.2.1
 
 dev_dependencies:
   flutter_test:

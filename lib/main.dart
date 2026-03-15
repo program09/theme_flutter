@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ui/examples/example.dart';
@@ -8,7 +7,6 @@ import 'package:ui/routers/go.dart';
 import 'package:ui/ui/theme.dart';
 import 'package:ui/utils/files.dart';
 import 'package:ui/utils/logs.dart';
-
 import 'package:path_provider/path_provider.dart';
 import 'package:ui/utils/permissions.dart';
 
@@ -16,6 +14,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Perm.getManageExternalStorage();
+  await Perm.getCamera();
 
   Directory? directory;
   if (Platform.isAndroid) {
@@ -163,6 +162,13 @@ class _HomeScreenState extends State<HomeScreen> {
               ).push(MaterialPageRoute(builder: (_) => const OrmDemoScreen())),
               icon: const Icon(Icons.storage),
               label: const Text('Ir a ORM Demo'),
+            ),
+
+            const SizedBox(height: 12),
+            ElevatedButton.icon(
+              onPressed: () => Go.to(route: Routes.camera),
+              icon: const Icon(Icons.camera_alt),
+              label: const Text('Ir a Camera Demo'),
             ),
 
             // Muestra el resultado recibido al volver
