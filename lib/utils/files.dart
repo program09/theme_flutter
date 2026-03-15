@@ -31,6 +31,8 @@ class FileManager {
           final path = extDir.path;
           final index = path.indexOf("/Android/data/");
           base = (index != -1) ? Directory(path.substring(0, index)) : extDir;
+        } else if (Platform.isIOS) {
+          base = await getApplicationDocumentsDirectory();
         }
         break;
       case TypeDirectory.public:

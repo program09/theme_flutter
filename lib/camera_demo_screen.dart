@@ -30,10 +30,7 @@ class _CameraDemoScreenState extends State<CameraDemoScreen> {
     });
 
     try {
-      final XFile? photo = await _picker.pickImage(
-        source: source,
-        imageQuality: 85,
-      );
+      final XFile? photo = await _picker.pickImage(source: source);
 
       if (photo != null) {
         setState(() => _statusText = 'Guardando archivo...');
