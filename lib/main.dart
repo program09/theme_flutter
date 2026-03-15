@@ -124,7 +124,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _irAExample() async {
     // Pasamos parámetrosdinámicos a la ruta
-    final result = await Go.to(route: Routes.example, args: {'id': 123});
+    final result = await Go.to(route: Routes.example, args: {'id': 123, 'projectId': 456});
 
     lg.s(msg: 'Usuario autenticado1', module: 'AUTH');
     lg.d(msg: 'Usuario autenticado2', module: 'AUTH');

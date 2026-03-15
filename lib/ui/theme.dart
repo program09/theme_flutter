@@ -540,8 +540,8 @@ class AppTheme {
     // INPUTS
     // ----------------------------------------------------------
     inputDecorationTheme: const InputDecorationTheme(
-      filled: false,
-      fillColor: AppColorsDark.surfaceVariant,
+      filled: true,
+      fillColor: AppColorsDark.background,
       floatingLabelBehavior: FloatingLabelBehavior.always,
       labelStyle: TextStyle(fontWeight: FontWeight.w500),
       hintStyle: TextStyle(
@@ -639,8 +639,8 @@ class AppTheme {
 
     dropdownMenuTheme: const DropdownMenuThemeData(
       inputDecorationTheme: InputDecorationTheme(
-        filled: false,
-        fillColor: AppColorsDark.surfaceVariant,
+        filled: true,
+        fillColor: AppColorsDark.background,
         floatingLabelBehavior: FloatingLabelBehavior.always,
         contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         labelStyle: TextStyle(

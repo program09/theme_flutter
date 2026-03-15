@@ -151,6 +151,8 @@ class FormsExampleState extends State<FormsExample> {
                         onChanged: (value) {},
                       ),
                       const SizedBox(height: 20),
+                      const Divider(),
+                      const SizedBox(height: 20),
                       InputAutocompleteUI(
                         label: 'Autocomplete',
                         hintText: 'Search...',
