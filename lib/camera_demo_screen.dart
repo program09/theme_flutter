@@ -30,7 +30,10 @@ class _CameraDemoScreenState extends State<CameraDemoScreen> {
     });
 
     try {
-      final XFile? photo = await _picker.pickImage(source: source);
+      final XFile? photo = await _picker.pickImage(
+        source: source,
+        imageQuality: 100,
+      );
 
       if (photo != null) {
         setState(() => _statusText = 'Guardando archivo...');
@@ -67,18 +70,34 @@ class _CameraDemoScreenState extends State<CameraDemoScreen> {
     });
 
     try {
-      final encrypted = await FileManager.encryptFile(
-        file: _image!,
+      final oldFile = _image!;
+      final tempEncrypted = await FileManager.encryptFile(
+        file: oldFile,
         key: _appKey,
         iv: _appIv,
       );
 
-      if (encrypted != null) {
-        setState(() {
-          _isEncrypted = true;
-          _image = encrypted;
-        });
-        lg.s(msg: 'Archivo encriptado con éxito', module: 'CAMERA');
+      if (tempEncrypted != null) {
+        // Save to permanent storage
+        final fileName = 'enc_${DateTime.now().millisecondsSinceEpoch}.jpg';
+        final savedFile = await FileManager.saveFile(
+          typeDirectory: TypeDirectory.external,
+          folder: 'encriptado',
+          fileName: fileName,
+          file: tempEncrypted,
+        );
+
+        if (savedFile != null) {
+          // Cleanup: delete both the original and the intermediate temp file
+          if (await oldFile.exists()) await oldFile.delete();
+          if (await tempEncrypted.exists()) await tempEncrypted.delete();
+
+          setState(() {
+            _isEncrypted = true;
+            _image = savedFile;
+          });
+          lg.s(msg: 'Archivo encriptado y guardado', module: 'CAMERA');
+        }
       }
     } catch (e) {
       lg.e(msg: 'Error encriptando: $e', module: 'CAMERA');
@@ -96,18 +115,34 @@ class _CameraDemoScreenState extends State<CameraDemoScreen> {
     });
 
     try {
-      final decrypted = await FileManager.decryptFile(
-        file: _image!,
+      final oldFile = _image!;
+      final tempDecrypted = await FileManager.decryptFile(
+        file: oldFile,
         key: _appKey,
         iv: _appIv,
       );
 
-      if (decrypted != null) {
-        setState(() {
-          _isEncrypted = false;
-          _image = decrypted;
-        });
-        lg.s(msg: 'Archivo desencriptado con éxito', module: 'CAMERA');
+      if (tempDecrypted != null) {
+        // Save to permanent storage
+        final fileName = 'dec_${DateTime.now().millisecondsSinceEpoch}.jpg';
+        final savedFile = await FileManager.saveFile(
+          typeDirectory: TypeDirectory.external,
+          folder: 'desencriptado',
+          fileName: fileName,
+          file: tempDecrypted,
+        );
+
+        if (savedFile != null) {
+          // Cleanup: delete both the original and the intermediate temp file
+          if (await oldFile.exists()) await oldFile.delete();
+          if (await tempDecrypted.exists()) await tempDecrypted.delete();
+
+          setState(() {
+            _isEncrypted = false;
+            _image = savedFile;
+          });
+          lg.s(msg: 'Archivo desencriptado y guardado', module: 'CAMERA');
+        }
       }
     } catch (e) {
       lg.e(msg: 'Error desencriptando: $e', module: 'CAMERA');

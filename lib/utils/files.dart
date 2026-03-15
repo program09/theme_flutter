@@ -3,6 +3,7 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:encrypt/encrypt.dart' as enc;
 import 'package:flutter/foundation.dart';
+import 'package:uuid/uuid.dart';
 
 enum TypeDirectory { external, public, private, cache }
 
@@ -120,6 +121,10 @@ class FileManager {
     return await Directory(join(directory.path, folder)).exists();
   }
 
+  static Future<bool> existFolderPath({required String path}) async {
+    return await Directory(path).exists();
+  }
+
   static Future<void> deleteFolderDirectory({
     required TypeDirectory typeDirectory,
     required String folder,
@@ -161,6 +166,8 @@ class FileManager {
   }
 
   // --- Encryption / Decryption ---
+  // Save decrypted file in a temp directory. name file uuid + extension
+  // Save encrypted file in a temp directory. name file uuid + extension
 
   static Future<File?> encryptFile({
     required File file,
@@ -170,13 +177,19 @@ class FileManager {
     try {
       if (!await file.exists()) return null;
       final bytes = await file.readAsBytes();
+      
+      final cacheDir = await getCacheDirectoryApp();
+      if (cacheDir == null) return null;
+
+      final nameTempFile = "${const Uuid().v4()}${extension(file.path)}";
+      final tempFile = File(join(cacheDir.path, nameTempFile));
 
       final encryptedBytes = await compute(
         _processCipher,
         _CipherData(bytes: bytes, key: key, iv: iv, isEncrypt: true),
       );
 
-      return await file.writeAsBytes(encryptedBytes);
+      return await tempFile.writeAsBytes(encryptedBytes);
     } catch (e) {
       return null;
     }
@@ -191,12 +204,18 @@ class FileManager {
       if (!await file.exists()) return null;
       final bytes = await file.readAsBytes();
 
+      final cacheDir = await getCacheDirectoryApp();
+      if (cacheDir == null) return null;
+
+      final nameTempFile = "${const Uuid().v4()}${extension(file.path)}";
+      final tempFile = File(join(cacheDir.path, nameTempFile));
+
       final decryptedBytes = await compute(
         _processCipher,
         _CipherData(bytes: bytes, key: key, iv: iv, isEncrypt: false),
       );
 
-      return await file.writeAsBytes(decryptedBytes);
+      return await tempFile.writeAsBytes(decryptedBytes);
     } catch (e) {
       return null;
     }
