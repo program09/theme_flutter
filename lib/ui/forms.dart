@@ -410,36 +410,28 @@ class CheckboxUI extends StatefulWidget {
 class _CheckboxUIState extends State<CheckboxUI> {
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () => widget.onChecked(!widget.value),
-      borderRadius: BorderRadius.circular(12),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        child: Row(
-          children: [
-            Transform.scale(
-              scale: 1.2,
-              child: Checkbox(
-                value: widget.value,
-                onChanged: (value) => widget.onChecked(value),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                widget.label,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyLarge?.copyWith(fontSize: 15),
-              ),
-            ),
-          ],
+    return Row(
+      children: [
+        Transform.scale(
+          scale: 1.2,
+          child: Checkbox(
+            value: widget.value,
+            onChanged: (value) => widget.onChecked(value),
+          ),
         ),
-      ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            widget.label,
+            style: Theme.of(
+              context,
+            ).textTheme.bodyLarge?.copyWith(fontSize: 15),
+          ),
+        ),
+      ],
     );
   }
 }
-
 // end: CheckboxUI
 
 // start: TabsUI
