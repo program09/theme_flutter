@@ -113,6 +113,17 @@ class FormsExampleState extends State<FormsExample> {
                         },
                       ),
                       const SizedBox(height: 20),
+
+                      CheckboxUI(
+                        label: 'Checkbox',
+                        value: _value,
+                        
+                        onChecked: (value) {
+                          setState(() {
+                            _value = value;
+                          });
+                        },
+                      ),
                       const SizedBox(height: 20),
                       SelectUI(
                         label: 'Opciones as',

@@ -312,7 +312,20 @@ class AppTheme {
     // SELECTION CONTROLS
     // ----------------------------------------------------------
     checkboxTheme: CheckboxThemeData(
-      fillColor: WidgetStateProperty.all(AppGeneralColors.primary),
+      fillColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return AppGeneralColors.primary;
+        }
+        return Colors.transparent;
+      }),
+      checkColor: WidgetStateProperty.all(Colors.white),
+      side: const BorderSide(color: AppColorsLight.outline, width: 1.5),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(6)),
+      ),
+      splashRadius: 20,
+      visualDensity: VisualDensity.comfortable,
+      materialTapTargetSize: MaterialTapTargetSize.padded,
     ),
 
     radioTheme: RadioThemeData(
@@ -574,7 +587,20 @@ class AppTheme {
     // SELECTION CONTROLS
     // ----------------------------------------------------------
     checkboxTheme: CheckboxThemeData(
-      fillColor: WidgetStateProperty.all(AppGeneralColors.primary),
+      fillColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return AppGeneralColors.primary;
+        }
+        return Colors.transparent;
+      }),
+      checkColor: WidgetStateProperty.all(Colors.white),
+      side: const BorderSide(color: AppColorsDark.outline, width: 2),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(6)),
+      ),
+      splashRadius: 20,
+      visualDensity: VisualDensity.comfortable,
+      materialTapTargetSize: MaterialTapTargetSize.padded,
     ),
 
     radioTheme: RadioThemeData(

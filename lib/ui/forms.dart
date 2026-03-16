@@ -390,6 +390,58 @@ Widget switchUI({required bool value, required Function onChecked}) {
 
 // end: SwitchUI
 
+// start: CheckboxUI
+
+class CheckboxUI extends StatefulWidget {
+  final String label;
+  final bool value;
+  final Function onChecked;
+  const CheckboxUI({
+    super.key,
+    required this.label,
+    required this.value,
+    required this.onChecked,
+  });
+
+  @override
+  State<CheckboxUI> createState() => _CheckboxUIState();
+}
+
+class _CheckboxUIState extends State<CheckboxUI> {
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () => widget.onChecked(!widget.value),
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Row(
+          children: [
+            Transform.scale(
+              scale: 1.2,
+              child: Checkbox(
+                value: widget.value,
+                onChanged: (value) => widget.onChecked(value),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                widget.label,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyLarge?.copyWith(fontSize: 15),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// end: CheckboxUI
+
 // start: TabsUI
 
 enum PositionTab { top, bottom }
