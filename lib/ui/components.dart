@@ -625,3 +625,105 @@ class BottomModalUI extends StatelessWidget {
 }
 
 // end: BottomModalUI
+
+// start: ModalUI
+
+class ModalUI extends StatelessWidget {
+  final String? title;
+  final TextAlign? textAlign;
+  final List<Widget> children;
+  final List<Widget>? actions;
+  final bool showDivider;
+  final double? maxWidth;
+
+  const ModalUI({
+    super.key,
+    this.title,
+    this.textAlign,
+    required this.children,
+    this.actions,
+    this.showDivider = true,
+    this.maxWidth,
+  });
+
+  /// Static method to quickly show a centered modal anywhere
+  static Future<T?> show<T>({
+    required BuildContext context,
+    String? title,
+    TextAlign? textAlign,
+    required List<Widget> children,
+    List<Widget>? actions,
+    final bool showDivider = true,
+    bool isDismissible = true,
+    double? maxWidth,
+  }) {
+    return showDialog<T>(
+      context: context,
+      barrierDismissible: isDismissible,
+      barrierColor: const Color.fromARGB(70, 0, 0, 0),
+      builder: (BuildContext context) {
+        return ModalUI(
+          title: title,
+          textAlign: textAlign,
+          maxWidth: maxWidth,
+          actions: actions,
+          showDivider: showDivider,
+          children: children,
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+      elevation: 0,
+      backgroundColor: theme.colorScheme.surface,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+      child: Container(
+        constraints: BoxConstraints(
+          maxWidth: maxWidth ?? 400,
+          maxHeight: MediaQuery.sizeOf(context).height * 0.8,
+        ),
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (title != null) ...[
+              Text(
+                title!,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
+                textAlign: textAlign ?? TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+            ],
+            Flexible(
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: children,
+                ),
+              ),
+            ),
+            if (actions != null && actions!.isNotEmpty) ...[
+              const SizedBox(height: 20),
+              if (showDivider) ...[Divider(), const SizedBox(height: 10)],
+              Row(mainAxisAlignment: MainAxisAlignment.end, children: actions!),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// end: ModalUI

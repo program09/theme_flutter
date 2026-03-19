@@ -390,6 +390,47 @@ class FormsExampleState extends State<FormsExample> {
                         },
                       ),
                       const SizedBox(height: 20),
+                      BtnUI(
+                        text: 'Abrir Modal Central',
+                        icon: Icons.aspect_ratio,
+                        fullWidth: true,
+                        type: TypeBtn.secondary,
+                        onPressed: () {
+                          ModalUI.show(
+                            context: context,
+                            title: 'Atención',
+                            textAlign: TextAlign.start,
+                            showDivider: false,
+                            children: [
+                              const Text(
+                                'Este es el nuevo ModalUI centrado en la pantalla. Puedes usarlo para confirmaciones, alertas complejas o formularios pequeños.',
+                                textAlign: TextAlign.start,
+                              ),
+                              const SizedBox(height: 24),
+                              InputUI(
+                                label: 'Confirmar acción',
+                                hintText: 'Escribe algo aquí',
+                                controller: TextEditingController(),
+                              ),
+                            ],
+                            actions: [
+                              BtnUI(
+                                text: 'Cancelar',
+                                style: StyleBtn.text,
+                                type: TypeBtn.secondary,
+                                onPressed: () => Go.back(),
+                              ),
+                              const SizedBox(width: 10),
+                              BtnUI(
+                                text: 'Aceptar',
+                                type: TypeBtn.primary,
+                                onPressed: () => Go.back(),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 20),
                     ],
                   ),
                 ),
