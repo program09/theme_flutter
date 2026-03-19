@@ -68,7 +68,7 @@ class GoAnimation {
 class GoArgs {
   GoArgs._();
   static dynamic get argsAll => Get.arguments;
-  static dynamic args(String key) => Get.arguments[key];
+  static dynamic args(String key) => Get.arguments?[key];
 }
 
 // ─────────────────────────────────────────
