@@ -436,6 +436,88 @@ class FormsExampleState extends State<FormsExample> {
                 ),
               ),
             ),
+
+            const SizedBox(height: 20),
+
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              // numero de colummas
+              children: [
+                cardUI(
+                  aspectRatio: '1:1',
+                  children: [
+                    const Text(
+                      'Este es el nuevo ModalUI centrado en la pantalla. Puedes usarlo para confirmaciones, alertas complejas o formularios pequeños.',
+                      textAlign: TextAlign.start,
+                    ),
+                    const SizedBox(height: 24),
+                    InputUI(
+                      label: 'Confirmar acción',
+                      hintText: 'Escribe algo aquí',
+                      controller: TextEditingController(),
+                    ),
+                  ],
+                ),
+                cardUI(
+                  aspectRatio: '16:9',
+                  children: [
+                    const Text(
+                      'Este es el nuevo ModalUI centrado en la pantalla. Puedes usarlo para confirmaciones, alertas complejas o formularios pequeños.',
+                      textAlign: TextAlign.start,
+                    ),
+                    const SizedBox(height: 24),
+                    InputUI(
+                      label: 'Confirmar acción',
+                      hintText: 'Escribe algo aquí',
+                      controller: TextEditingController(),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 20),
+
+            gridUI(
+              columns: 2,
+              spacing: 0,
+              runSpacing: 0,
+              children: [
+                cardUI(
+                  aspectRatio: CardAspectRatio.classicPortrait,
+                  children: [
+                    const Text(
+                      'Este es el nuevo ModalUI centrado en la pantalla. Puedes usarlo para confirmaciones, alertas complejas o formularios pequeños.',
+                      textAlign: TextAlign.start,
+                    ),
+                    const SizedBox(height: 24),
+                    InputUI(
+                      label: 'Confirmar acción',
+                      hintText: 'Escribe algo aquí',
+                      controller: TextEditingController(),
+                    ),
+                  ],
+                ),
+                cardUI(
+                  aspectRatio: CardAspectRatio.custom(2, 3),
+                  children: [
+                    const Text(
+                      'Este es el nuevo ModalUI centrado en la pantalla. Puedes usarlo para confirmaciones, alertas complejas o formularios pequeños.',
+                      textAlign: TextAlign.start,
+                    ),
+                    const SizedBox(height: 24),
+                    InputUI(
+                      label: 'Confirmar acción',
+                      hintText: 'Escribe algo aquí',
+                      controller: TextEditingController(),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 100),
           ],
         ),
       ),

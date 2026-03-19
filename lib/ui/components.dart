@@ -727,3 +727,100 @@ class ModalUI extends StatelessWidget {
 }
 
 // end: ModalUI
+
+// start: cardUI
+
+class CardAspectRatio {
+  static const String square = '1:1';
+  static const String landscape = '16:9';
+  static const String portrait = '9:16';
+  static const String classic = '4:3'; // Clásico apaisado/horizontal
+  static const String classicPortrait = '3:4'; // Clásico retrato/vertical
+  static String custom(double w, double h) => '$w:$h';
+}
+
+Widget cardUI({
+  required List<Widget> children,
+  bool withPadding = true,
+  EdgeInsetsGeometry? padding,
+  String? aspectRatio, // formato: '1:1', '16:9', '3:4', etc.
+}) {
+  Widget childrenLocal = Column(
+    mainAxisSize: MainAxisSize.min,
+    mainAxisAlignment: MainAxisAlignment.start,
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: children,
+  );
+
+  Widget card = Builder(
+    builder: (context) {
+      final theme = Theme.of(context);
+
+      return Card(
+        shadowColor: const Color.fromARGB(255, 0, 0, 0).withValues(alpha: 0.15),
+        elevation: 10,
+        clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(
+            color: theme.colorScheme.outline.withValues(alpha: .5),
+            width: 1,
+          ),
+        ),
+        child: withPadding
+            ? Padding(
+                padding: padding ?? const EdgeInsets.all(15),
+                child: childrenLocal,
+              )
+            : childrenLocal,
+      );
+    },
+  );
+
+  if (aspectRatio != null && aspectRatio.contains(':')) {
+    final parts = aspectRatio.split(':');
+    if (parts.length == 2) {
+      final w = double.tryParse(parts[0]);
+      final h = double.tryParse(parts[1]);
+      if (w != null && h != null && h > 0) {
+        return AspectRatio(aspectRatio: w / h, child: card);
+      }
+    }
+  }
+
+  return card;
+}
+
+// end: cardUI
+
+// start: gridUI
+
+Widget gridUI({
+  required List<Widget> children,
+  int columns = 2,
+  double spacing = 10.0,
+  double runSpacing = 10.0,
+  EdgeInsetsGeometry? padding,
+}) {
+  return LayoutBuilder(
+    builder: (context, constraints) {
+      // Calculamos el ancho exacto que debe tener cada columna
+      // restando el espacio total de separación entre ellas
+      final double totalSpacing = spacing * (columns - 1);
+      final double itemWidth = (constraints.maxWidth - totalSpacing) / columns;
+
+      return Padding(
+        padding: padding ?? EdgeInsets.zero,
+        child: Wrap(
+          spacing: spacing,
+          runSpacing: runSpacing,
+          children: children.map((child) {
+            return SizedBox(width: itemWidth, child: child);
+          }).toList(),
+        ),
+      );
+    },
+  );
+}
+
+// end: gridUI
