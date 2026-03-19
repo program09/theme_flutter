@@ -532,3 +532,96 @@ class _BtnUIState extends State<BtnUI> {
 }
 
 // end: bottons
+
+// start: BottomModalUI
+
+class BottomModalUI extends StatelessWidget {
+  final double? minHeight;
+  final double? maxHeight;
+  final List<Widget> children;
+
+  const BottomModalUI({
+    super.key,
+    this.minHeight,
+    this.maxHeight,
+    required this.children,
+  });
+
+  /// Static method to quickly show the bottom modal anywhere
+  static Future<T?> show<T>({
+    required BuildContext context,
+    double? minHeight,
+    double? maxHeight,
+    required List<Widget> children,
+    bool isDismissible = true,
+  }) {
+    return showModalBottomSheet<T>(
+      context: context,
+      isScrollControlled: true,
+      isDismissible: isDismissible,
+      barrierColor: const Color.fromARGB(70, 0, 0, 0),
+      backgroundColor: Colors.transparent, // Background handled within
+      builder: (BuildContext context) {
+        return BottomModalUI(
+          minHeight: minHeight,
+          maxHeight: maxHeight,
+          children: children,
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return SafeArea(
+      child: Padding(
+        // Push up when keyboard appears
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+          top: MediaQuery.of(context).size.height * 0.04,
+        ),
+        child: Container(
+          constraints: BoxConstraints(
+            minHeight: minHeight ?? 200,
+            maxHeight: maxHeight ?? MediaQuery.sizeOf(context).height * 0.8,
+          ),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 12),
+              // Drag handle
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.onSurfaceVariant.withValues(
+                    alpha: 0.4,
+                  ),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // Custom Payload content
+              Flexible(
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
+                  child: Column(children: children),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// end: BottomModalUI

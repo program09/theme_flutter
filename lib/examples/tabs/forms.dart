@@ -1,7 +1,9 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:ui/routers/go.dart';
 import 'package:ui/ui/forms.dart';
+import 'package:ui/ui/components.dart';
 
 class FormsExample extends StatefulWidget {
   final Map<String, dynamic>? data;
@@ -355,6 +357,36 @@ class FormsExampleState extends State<FormsExample> {
                           setState(() {
                             _selectedDateTime = value;
                           });
+                        },
+                      ),
+                      const SizedBox(height: 20),
+                      BtnUI(
+                        text: 'Abrir Bottom Modal',
+                        icon: Icons.open_in_browser,
+                        fullWidth: true,
+                        onPressed: () {
+                          BottomModalUI.show(
+                            context: context,
+                            isDismissible: true,
+                            maxHeight: 800,
+                            minHeight: 300,
+                            children: [
+                              const Text(
+                                'Aquí puedes incluir cualquier otro componente como DatePickers, SelectUI, etc. usando todo el espacio disponible.',
+                              ),
+                              InputUI(
+                                label: 'Test',
+                                hintText: 'Hint',
+                                controller: _textController,
+                              ),
+                              const SizedBox(height: 104),
+                              BtnUI(
+                                text: 'Entendido',
+                                type: TypeBtn.primary,
+                                onPressed: () => Go.back(),
+                              ),
+                            ],
+                          );
                         },
                       ),
                       const SizedBox(height: 20),
