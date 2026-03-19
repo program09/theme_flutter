@@ -160,6 +160,13 @@ class InputAutocompleteUI extends StatefulWidget {
 
 class _InputAutocompleteUIState extends State<InputAutocompleteUI> {
   bool isPasswordVisible = false;
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   Widget? icon() {
     return widget.type == Type.password
@@ -216,7 +223,9 @@ class _InputAutocompleteUIState extends State<InputAutocompleteUI> {
                 // Sincronizar controladores si es necesario
                 if (widget.controller.text != textEditingController.text &&
                     widget.controller.text.isNotEmpty) {
-                  textEditingController.text = widget.controller.text;
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    textEditingController.text = widget.controller.text;
+                  });
                 }
 
                 return InputUI(
@@ -261,7 +270,9 @@ class _InputAutocompleteUIState extends State<InputAutocompleteUI> {
                   clipBehavior: Clip.antiAlias,
                   child: Scrollbar(
                     thumbVisibility: true,
+                    controller: _scrollController,
                     child: ListView.builder(
+                      controller: _scrollController,
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       shrinkWrap: true,
                       itemCount: options.length,
@@ -358,6 +369,13 @@ class SelectUI extends StatelessWidget {
               ),
             ),
           ),
+          inputDecorationTheme: Theme.of(context).inputDecorationTheme.copyWith(
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 18,
+            ),
+            labelStyle: const TextStyle(fontWeight: FontWeight.w500),
+          ),
           label: Text(label),
           hintText: effectiveHint,
           errorText: errorText,
@@ -433,6 +451,200 @@ class _CheckboxUIState extends State<CheckboxUI> {
   }
 }
 // end: CheckboxUI
+
+// start: PickerDateTimeUI
+
+enum PickerDateTimeType { date, time, datetime }
+
+class PickerDateTimeUI extends StatefulWidget {
+  final String label;
+  final String? hintText;
+  final String? errorText;
+  final DateTime? value;
+  final PickerDateTimeType type;
+  final ValueChanged<DateTime?>? onChanged;
+  final String? Function(DateTime?)? validator;
+  final bool disabled;
+  final IconData? prefixIcon;
+
+  const PickerDateTimeUI({
+    super.key,
+    required this.label,
+    this.hintText,
+    this.errorText,
+    this.value,
+    this.type = PickerDateTimeType.date,
+    this.onChanged,
+    this.validator,
+    this.disabled = false,
+    this.prefixIcon,
+  });
+
+  @override
+  State<PickerDateTimeUI> createState() => _PickerDateTimeUIState();
+}
+
+class _PickerDateTimeUIState extends State<PickerDateTimeUI> {
+  late TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: _format(widget.value));
+  }
+
+  @override
+  void didUpdateWidget(covariant PickerDateTimeUI oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.value != oldWidget.value) {
+      final newText = _format(widget.value);
+      if (_controller.text != newText) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            _controller.text = newText;
+          }
+        });
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  String _format(DateTime? date) {
+    if (date == null) return '';
+    final str = date.toString();
+    switch (widget.type) {
+      case PickerDateTimeType.date:
+        return str.split(' ')[0];
+      case PickerDateTimeType.time:
+        return str.substring(11, 16);
+      case PickerDateTimeType.datetime:
+        return str.substring(0, 16);
+    }
+  }
+
+  Future<void> _selectDateOrTime() async {
+    if (widget.disabled) return;
+
+    DateTime initialDate = widget.value ?? DateTime.now();
+
+    if (widget.type == PickerDateTimeType.date ||
+        widget.type == PickerDateTimeType.datetime) {
+      final DateTime? pickedDate = await showDatePicker(
+        context: context,
+        initialDate: initialDate,
+        firstDate: DateTime(1900),
+        lastDate: DateTime(2100),
+      );
+
+      if (pickedDate != null) {
+        if (widget.type == PickerDateTimeType.datetime) {
+          final TimeOfDay? pickedTime = await showTimePicker(
+            context: context,
+            initialTime: TimeOfDay.fromDateTime(initialDate),
+            builder: (context, child) {
+              return MediaQuery(
+                data: MediaQuery.of(
+                  context,
+                ).copyWith(alwaysUse24HourFormat: true),
+                child: child!,
+              );
+            },
+          );
+
+          if (pickedTime != null) {
+            final finalDateTime = DateTime(
+              pickedDate.year,
+              pickedDate.month,
+              pickedDate.day,
+              pickedTime.hour,
+              pickedTime.minute,
+            );
+            widget.onChanged?.call(finalDateTime);
+          }
+        } else {
+          final finalDateTime = DateTime(
+            pickedDate.year,
+            pickedDate.month,
+            pickedDate.day,
+            initialDate.hour,
+            initialDate.minute,
+          );
+          widget.onChanged?.call(finalDateTime);
+        }
+      }
+    } else if (widget.type == PickerDateTimeType.time) {
+      final TimeOfDay? pickedTime = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.fromDateTime(initialDate),
+        builder: (context, child) {
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+            child: child!,
+          );
+        },
+      );
+
+      if (pickedTime != null) {
+        final finalDateTime = DateTime(
+          initialDate.year,
+          initialDate.month,
+          initialDate.day,
+          pickedTime.hour,
+          pickedTime.minute,
+        );
+        widget.onChanged?.call(finalDateTime);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    IconData defaultIcon;
+    switch (widget.type) {
+      case PickerDateTimeType.date:
+        defaultIcon = Icons.calendar_today;
+        break;
+      case PickerDateTimeType.time:
+        defaultIcon = Icons.access_time;
+        break;
+      case PickerDateTimeType.datetime:
+        defaultIcon = Icons.event;
+        break;
+    }
+
+    return TextFormField(
+      controller: _controller,
+      readOnly: true,
+      enabled: !widget.disabled,
+      onTap: _selectDateOrTime,
+      decoration: InputDecoration(
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 18,
+        ),
+        labelText: widget.label,
+        labelStyle: const TextStyle(fontWeight: FontWeight.w500),
+        hintText: widget.hintText ?? 'Seleccionar...',
+        errorText: widget.errorText,
+        prefixIcon: widget.prefixIcon != null ? Icon(widget.prefixIcon) : null,
+        suffixIcon: Icon(defaultIcon),
+      ),
+      validator: (value) {
+        if (widget.validator != null) {
+          return widget.validator!(widget.value);
+        }
+        return null;
+      },
+    );
+  }
+}
+
+// end: PickerDateTimeUI
 
 // start: TabsUI
 

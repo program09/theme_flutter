@@ -21,6 +21,9 @@ class FormsExample extends StatefulWidget {
 class FormsExampleState extends State<FormsExample> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _value = false;
+  DateTime? _selectedDate;
+  DateTime? _selectedTime;
+  DateTime? _selectedDateTime;
 
   // Controladores persistentes
   late final TextEditingController _autocompleteController;
@@ -117,7 +120,7 @@ class FormsExampleState extends State<FormsExample> {
                       CheckboxUI(
                         label: 'Checkbox',
                         value: _value,
-                        
+
                         onChecked: (value) {
                           setState(() {
                             _value = value;
@@ -162,46 +165,96 @@ class FormsExampleState extends State<FormsExample> {
                         onChanged: (value) {},
                       ),
                       const SizedBox(height: 20),
+
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: InputUI(
+                              label: 'Text',
+                              hintText: 'Hint',
+                              disabled: false,
+                              controller: _textController,
+                              type: Type.text,
+                              errorText: 'Error',
+                              prefixIcon: Icons.person,
+                              suffixIcon: Icons.person,
+                              onChanged: (value) {},
+                              validator: (value) {
+                                return value;
+                              },
+                              onSubmitted: (value) {},
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: SelectUI(
+                              label: 'Empty Select',
+                              options: const [
+                                Option(value: '4', label: 'Option 4'),
+                                Option(value: '5', label: 'Option 5'),
+                                Option(value: '6', label: 'Option 6'),
+                                Option(value: '7', label: 'Option 7'),
+                                Option(value: '8', label: 'Option 8'),
+                                Option(value: '9', label: 'Option 9'),
+                                Option(value: '10', label: 'Option 10'),
+                              ],
+                              onChanged: (value) {},
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
                       const Divider(),
                       const SizedBox(height: 20),
-                      InputAutocompleteUI(
-                        label: 'Autocomplete',
-                        hintText: 'Search...',
-                        controller: _autocompleteController,
-                        options: const [
-                          Option(value: '1', label: 'Option 1'),
-                          Option(value: '2', label: 'Option 2'),
-                          Option(value: '3', label: 'Option 3'),
-                          Option(value: '4', label: 'Option 4'),
-                          Option(value: '5', label: 'Option 5'),
-                          Option(value: '6', label: 'Option 6'),
-                          Option(value: '7', label: 'Option 7'),
-                          Option(value: '8', label: 'Option 8'),
-                          Option(value: '9', label: 'Option 9'),
-                          Option(value: '10', label: 'Option 10'),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: InputAutocompleteUI(
+                              label: 'Autocomplete',
+                              hintText: 'Search...',
+                              controller: _autocompleteController,
+                              options: const [
+                                Option(value: '1', label: 'Option 1'),
+                                Option(value: '2', label: 'Option 2'),
+                                Option(value: '3', label: 'Option 3'),
+                                Option(value: '4', label: 'Option 4'),
+                                Option(value: '5', label: 'Option 5'),
+                                Option(value: '6', label: 'Option 6'),
+                                Option(value: '7', label: 'Option 7'),
+                                Option(value: '8', label: 'Option 8'),
+                                Option(value: '9', label: 'Option 9'),
+                                Option(value: '10', label: 'Option 10'),
+                              ],
+                              prefixIcon: Icons.search,
+                              onSelected: (value) {
+                                log('Selected: $value');
+                              },
+                              onChanged: (value) {},
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: InputUI(
+                              label: 'Text',
+                              hintText: 'Hint',
+                              disabled: true,
+                              controller: _textController,
+                              type: Type.text,
+                              errorText: null,
+                              prefixIcon: Icons.person,
+                              suffixIcon: Icons.person,
+                              onChanged: (value) {},
+                              validator: (value) {
+                                return value;
+                              },
+                              onSubmitted: (value) {},
+                            ),
+                          ),
                         ],
-                        prefixIcon: Icons.search,
-                        onSelected: (value) {
-                          log('Selected: $value');
-                        },
-                        onChanged: (value) {},
                       ),
-                      const SizedBox(height: 20),
-                      InputUI(
-                        label: 'Text',
-                        hintText: 'Hint',
-                        disabled: true,
-                        controller: _textController,
-                        type: Type.text,
-                        errorText: 'Error',
-                        prefixIcon: Icons.person,
-                        suffixIcon: Icons.person,
-                        onChanged: (value) {},
-                        validator: (value) {
-                          return value;
-                        },
-                        onSubmitted: (value) {},
-                      ),
+
                       const SizedBox(height: 20),
                       InputUI(
                         label: 'Email',
@@ -269,6 +322,40 @@ class FormsExampleState extends State<FormsExample> {
                           decimal: true,
                           signed: true,
                         ),
+                      ),
+                      const SizedBox(height: 20),
+                      PickerDateTimeUI(
+                        label: 'Picker Date',
+                        type: PickerDateTimeType.date,
+                        value: _selectedDate,
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedDate = value;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 20),
+                      PickerDateTimeUI(
+                        label: 'Picker Time',
+                        type: PickerDateTimeType.time,
+                        value: _selectedTime,
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedTime = value;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 20),
+                      PickerDateTimeUI(
+                        errorText: 'Error',
+                        label: 'Picker Datetime',
+                        type: PickerDateTimeType.datetime,
+                        value: _selectedDateTime,
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedDateTime = value;
+                          });
+                        },
                       ),
                       const SizedBox(height: 20),
                     ],
