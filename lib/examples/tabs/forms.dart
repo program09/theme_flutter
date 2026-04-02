@@ -178,7 +178,7 @@ class FormsExampleState extends State<FormsExample> {
                               disabled: false,
                               controller: _textController,
                               type: Type.text,
-                              errorText: 'Error',
+                              errorText: null,
                               prefixIcon: Icons.person,
                               suffixIcon: Icons.person,
                               onChanged: (value) {},

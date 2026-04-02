@@ -743,6 +743,7 @@ Widget cardUI({
   required List<Widget> children,
   bool withPadding = true,
   EdgeInsetsGeometry? padding,
+  BorderRadius? borderRadius,
   String? aspectRatio, // formato: '1:1', '16:9', '3:4', etc.
 }) {
   Widget childrenLocal = Column(
@@ -759,9 +760,10 @@ Widget cardUI({
       return Card(
         shadowColor: const Color.fromARGB(255, 0, 0, 0).withValues(alpha: 0.15),
         elevation: 10,
-        clipBehavior: Clip.antiAlias,
+        //clipBehavior: Clip.antiAlias,
+        clipBehavior: Clip.none,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: borderRadius ?? BorderRadius.circular(20),
           side: BorderSide(
             color: theme.colorScheme.outline.withValues(alpha: .5),
             width: 1,

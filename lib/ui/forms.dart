@@ -96,7 +96,7 @@ class _InputUIState extends State<InputUI> {
       controller: widget.controller,
       enabled: !widget.disabled,
       decoration: InputDecoration(
-        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+        contentPadding: EdgeInsets.symmetric(horizontal: 15, vertical: 16),
         labelText: widget.label,
         labelStyle: TextStyle(fontWeight: FontWeight.w500),
         hintText: widget.type == Type.password ? '••••••••' : widget.hintText,
@@ -371,8 +371,8 @@ class SelectUI extends StatelessWidget {
           ),
           inputDecorationTheme: Theme.of(context).inputDecorationTheme.copyWith(
             contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 18,
+              horizontal: 15,
+              vertical: 15,
             ),
             labelStyle: const TextStyle(fontWeight: FontWeight.w500),
           ),
@@ -624,8 +624,8 @@ class _PickerDateTimeUIState extends State<PickerDateTimeUI> {
       onTap: _selectDateOrTime,
       decoration: InputDecoration(
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 18,
+          horizontal: 15,
+          vertical: 16,
         ),
         labelText: widget.label,
         labelStyle: const TextStyle(fontWeight: FontWeight.w500),
