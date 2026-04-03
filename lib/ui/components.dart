@@ -717,7 +717,11 @@ class ModalUI extends StatelessWidget {
             if (actions != null && actions!.isNotEmpty) ...[
               const SizedBox(height: 20),
               if (showDivider) ...[Divider(), const SizedBox(height: 10)],
-              Row(mainAxisAlignment: MainAxisAlignment.end, children: actions!),
+              Row(
+                spacing: 10,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: actions!,
+              ),
             ],
           ],
         ),
