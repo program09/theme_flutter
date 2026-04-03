@@ -13,6 +13,11 @@ class AppGeneralColors {
   static const onPrimary = Color(0xFFFFFFFF);
   static const primaryContainer = Color(0xFFDCE7FF);
   static const onPrimaryContainer = Color(0xFF0A1F44);
+
+  static const error = Color(0xFFF87171);
+  static const success = Color(0xFF4ADE80);
+  static const warning = Color(0xFFFBBF24);
+  static const info = Color(0xFF38BDF8);
 }
 // end: AppGeneralColors
 
@@ -45,15 +50,15 @@ class AppColorsLight {
   static const onMuted = Color(0xFF334155);
 
   // ERROR
-  static const error = Color(0xFFDC2626);
+  static const error = Color(0xFFF87171);
   static const onError = Color(0xFFFFFFFF);
   static const errorContainer = Color(0xFFFEE2E2);
   static const onErrorContainer = Color(0xFF7F1D1D);
 
   // STATUS
-  static const success = Color(0xFF16A34A);
-  static const warning = Color(0xFFF59E0B);
-  static const info = Color(0xFF0EA5E9);
+  static const success = Color(0xFF4ADE80);
+  static const warning = Color(0xFFFBBF24);
+  static const info = Color(0xFF38BDF8);
 
   // OUTLINE & DIVIDER
   static const outline = Color(0xFFE2E8F0);

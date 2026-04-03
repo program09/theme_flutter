@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:ui/routers/go.dart';
 import 'package:ui/ui/forms.dart';
 import 'package:ui/ui/components.dart';
+import 'package:ui/utils/logs.dart';
 
 class FormsExample extends StatefulWidget {
   final Map<String, dynamic>? data;
@@ -127,6 +128,20 @@ class FormsExampleState extends State<FormsExample> {
                           setState(() {
                             _value = value;
                           });
+                        },
+                      ),
+
+                      RadioGroupUI(
+                        options: const [
+                          Option(value: '1', label: 'Option 1'),
+                          Option(value: '2', label: 'Option 2'),
+                          Option(value: '3', label: 'Option 3'),
+                        ],
+                        title: 'Radio Button',
+                        value: '2',
+                        errorText: 'Error',
+                        onChanged: (value) {
+                          lg.i(msg: value.toString());
                         },
                       ),
                       const SizedBox(height: 20),

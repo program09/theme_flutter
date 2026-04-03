@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ui/ui/theme.dart';
 
 // Type input general
 class Type {
@@ -407,6 +408,163 @@ Widget switchUI({required bool value, required Function onChecked}) {
 }
 
 // end: SwitchUI
+
+// start: RADIO BUTTON
+
+class RadioGroupUI extends StatefulWidget {
+  final List<Option> options;
+  final String? title;
+  final String? errorText;
+  final String value;
+  final bool? vertical;
+  final Function(Option) onChanged;
+
+  const RadioGroupUI({
+    super.key,
+    required this.options,
+    this.title,
+    this.errorText,
+    this.vertical,
+    required this.value,
+    required this.onChanged,
+  });
+
+  @override
+  State<RadioGroupUI> createState() => _RadioGroupUIState();
+}
+
+class _RadioGroupUIState extends State<RadioGroupUI> {
+  late String _selectedValue;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedValue = widget.value;
+  }
+
+  @override
+  void didUpdateWidget(RadioGroupUI oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.value != widget.value) {
+      _selectedValue = widget.value;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final colorSelected = AppGeneralColors.primary;
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.zero,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (widget.title != null) ...[
+            Text(
+              widget.title!,
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+                color: Colors.black,
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
+
+          // Grid o Wrap de opciones
+          Wrap(
+            spacing: 5,
+            runSpacing: 5,
+            crossAxisAlignment: WrapCrossAlignment.start,
+            alignment: WrapAlignment.spaceBetween,
+            runAlignment: WrapAlignment.spaceBetween,
+            direction: widget.vertical == true
+                ? Axis.vertical
+                : Axis.horizontal,
+            children: widget.options.map((option) {
+              final isSelected = _selectedValue == option.value;
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedValue = option.value;
+                  });
+                  widget.onChanged(option);
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 10,
+                  ),
+
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 22,
+                        height: 22,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: isSelected
+                                ? colorSelected
+                                : isDark
+                                ? theme.colorScheme.outline
+                                : theme.colorScheme.outline,
+                            width: isSelected ? 2 : 3,
+                          ),
+                        ),
+                        child: isSelected
+                            ? Center(
+                                child: Container(
+                                  width: 10,
+                                  height: 10,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: colorSelected,
+                                  ),
+                                ),
+                              )
+                            : null,
+                      ),
+                      const SizedBox(width: 25),
+                      Text(
+                        option.label,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w400,
+                          color: isSelected
+                              ? theme.colorScheme.onSurface
+                              : isDark
+                              ? theme.colorScheme.onSurface
+                              : Colors.black,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+
+          if (widget.errorText != null) ...[
+            const SizedBox(height: 0),
+            Padding(
+              padding: const EdgeInsets.only(left: 20, right: 20),
+              child: Text(
+                widget.errorText!,
+                style: TextStyle(color: AppGeneralColors.error, fontSize: 12),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+// end: RADIO BUTTON
 
 // start: CheckboxUI
 
