@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:ui/ui/components.dart';
 import 'package:ui/ui/forms.dart';
+import 'package:ui/utils/alerts.dart';
 
 class ProfileExample extends StatefulWidget {
   final Map<String, dynamic>? data;
@@ -100,7 +101,9 @@ class ProfileExampleState extends State<ProfileExample> {
           text: 'Primary',
           type: TypeBtn.primary,
           style: style,
-          onPressed: () {},
+          onPressed: () {
+            Alerts.show(context, message: 'Primary', style: AlertStyle.solid);
+          },
           onLongPress: () {
             log('Long Press');
           },
@@ -109,26 +112,46 @@ class ProfileExampleState extends State<ProfileExample> {
           text: 'Secondary',
           type: TypeBtn.secondary,
           style: style,
-          onPressed: () {},
+          onPressed: () {
+            Alerts.show(context, message: 'Secondary', type: AlertType.success);
+          },
         ),
-        BtnUI(text: 'Info', type: TypeBtn.info, style: style, onPressed: () {}),
+        BtnUI(
+          text: 'Info',
+          type: TypeBtn.info,
+          style: style,
+          onPressed: () {
+            Alerts.show(context, message: 'Info', type: AlertType.info);
+          },
+        ),
         BtnUI(
           text: 'Success',
           type: TypeBtn.success,
           style: style,
-          onPressed: () {},
+          onPressed: () {
+            Alerts.show(context, message: 'Success', type: AlertType.success);
+          },
         ),
         BtnUI(
           text: 'Warning',
           type: TypeBtn.warning,
           style: style,
-          onPressed: () {},
+          onPressed: () {
+            Alerts.show(
+              context,
+              message: 'Warning',
+              type: AlertType.warning,
+              style: AlertStyle.mica,
+            );
+          },
         ),
         BtnUI(
           text: 'Danger',
           type: TypeBtn.danger,
           style: style,
-          onPressed: () {},
+          onPressed: () {
+            Alerts.show(context, message: 'Danger', type: AlertType.error);
+          },
         ),
         BtnUI(
           text: 'Loading',

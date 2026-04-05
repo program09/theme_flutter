@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 enum AlertType { success, error, warning, info, dark }
 
+enum AlertStyle { solid, mica }
+
 class Alerts {
   static void show(
     BuildContext context, {
@@ -10,10 +12,11 @@ class Alerts {
     AlertType type = AlertType.dark,
     Duration duration = const Duration(seconds: 3),
     bool isFloating = true,
+    AlertStyle? style = AlertStyle.solid,
   }) {
     if (!context.mounted) return;
 
-    final color = _getColor(type);
+    final color = _getColor(type: type, style: style);
     final icon = _getIcon(type);
 
     ScaffoldMessenger.of(context).clearSnackBars();
@@ -88,17 +91,32 @@ class Alerts {
         isFloating: false,
       );
 
-  static Color _getColor(AlertType type) {
+  static Color _getColor({
+    AlertType? type = AlertType.dark,
+    AlertStyle? style = AlertStyle.solid,
+  }) {
     switch (type) {
       case AlertType.success:
-        return const Color.fromARGB(183, 75, 199, 81);
+        return style == AlertStyle.solid
+            ? const Color.fromARGB(255, 75, 199, 81)
+            : const Color.fromARGB(183, 75, 199, 81);
       case AlertType.error:
-        return const Color.fromARGB(202, 228, 88, 88);
+        return style == AlertStyle.solid
+            ? const Color.fromARGB(255, 228, 88, 88)
+            : const Color.fromARGB(202, 228, 88, 88);
       case AlertType.warning:
-        return const Color.fromARGB(217, 248, 150, 70);
+        return style == AlertStyle.solid
+            ? const Color.fromARGB(255, 248, 150, 70)
+            : const Color.fromARGB(217, 248, 150, 70);
       case AlertType.info:
-        return const Color.fromARGB(178, 62, 140, 230);
+        return style == AlertStyle.solid
+            ? const Color.fromARGB(255, 62, 140, 230)
+            : const Color.fromARGB(178, 62, 140, 230);
       case AlertType.dark:
+        return style == AlertStyle.solid
+            ? const Color.fromARGB(255, 0, 0, 0)
+            : const Color.fromARGB(153, 0, 0, 0);
+      default:
         return const Color.fromARGB(153, 0, 0, 0);
     }
   }
