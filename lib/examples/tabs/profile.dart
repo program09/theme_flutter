@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:ui/ui/components.dart';
 import 'package:ui/ui/forms.dart';
 import 'package:ui/utils/alerts.dart';
+import 'package:ui/utils/logs.dart';
 
 class ProfileExample extends StatefulWidget {
   final Map<String, dynamic>? data;
@@ -102,6 +103,37 @@ class ProfileExampleState extends State<ProfileExample> {
           type: TypeBtn.primary,
           style: style,
           onPressed: () {
+            lg.s(
+              msg:
+                  'Primary success lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing elit',
+              module: 'PROFILE',
+            );
+            lg.d(
+              msg:
+                  'Primary debug lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing elit lorem ipsum dolor sit amet consectetur adipiscing elit',
+              module: 'PROFILE',
+            );
+            lg.i(
+              msg:
+                  'Primary info lorem ipsum dolor sit amet consectetur adipiscing elit',
+              module: 'PROFILE',
+            );
+            lg.w(
+              msg:
+                  'Primary warning lorem ipsum dolor sit amet consectetur adipiscing elit',
+              module: 'PROFILE',
+            );
+            lg.e(
+              msg:
+                  'Primary error lorem ipsum dolor sit amet consectetur adipiscing elit',
+              module: 'PROFILE',
+            );
+            lg.f(
+              msg:
+                  'Primary fatal lorem ipsum dolor sit amet consectetur adipiscing elit',
+              module: 'PROFILE',
+            );
+
             Alerts.show(context, message: 'Primary', style: AlertStyle.solid);
           },
           onLongPress: () {

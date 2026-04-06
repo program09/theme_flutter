@@ -18,24 +18,31 @@ class FastLogger {
 
   // Resource optimization constants
   static const int _maxFileSize = 5 * 1024 * 1024;
-  static const int _maxQueueSize = 1000; // Prevent memory leak by capping queue
+  static const int _maxQueueSize = 1000;
 
-  // Use ListQueue for efficient O(1) removal from front
   final ListQueue<String> _writeQueue = ListQueue<String>();
   bool _isWriting = false;
 
   static const _reset = '\x1B[0m';
-  static const _orange = '\x1B[38;5;215m';
+  static const _light = '\x1B[37m';
   static const _green = '\x1B[32m';
   static const _blue = '\x1B[34m';
   static const _yellow = '\x1B[33m';
   static const _red = '\x1B[31m';
-  static const _magenta = '\x1B[35m';
+  static const _fatal = '\x1B[38;2;139;69;19m';
+
+  int get _consoleWidth {
+    try {
+      return stdout.terminalColumns;
+    } catch (_) {
+      return 100;
+    }
+  }
 
   Future<void> init({
     required Directory directory,
-    bool saveToFile = false
-    }) async {
+    bool saveToFile = false,
+  }) async {
     _saveToFile = saveToFile;
     if (_saveToFile) {
       await _initLogFile(directory: directory);
@@ -44,7 +51,6 @@ class FastLogger {
 
   Future<void> _initLogFile({required Directory directory}) async {
     try {
-
       final logDir = Directory('${directory.path}/logs');
       if (!await logDir.exists()) {
         await logDir.create(recursive: true);
@@ -79,30 +85,52 @@ class FastLogger {
     String? module,
     StackTrace? stack,
   ]) {
-    final color = _getColor(level);
-    final label = level.toString().split('.').last.toUpperCase();
+    final label = level.toString().split('.').last.toLowerCase();
 
-    // In debug mode, we print to console immediately
     if (debugMode) {
+      final color = _getColor(level);
+      final moduleLabel = (module ?? label).toUpperCase();
+      final dividerLength = _consoleWidth - moduleLabel.length - 2;
+      final separatorLength = _consoleWidth - 2;
+
       final buffer = StringBuffer();
-      if (module != null && module.isNotEmpty) {
-        buffer.write('$color[$module]$_reset');
-      } else {
-        buffer.write('$color[$label]$_reset');
+
+      buffer.write('$color[$moduleLabel]${'-' * dividerLength}\n$_reset');
+
+      // Envolver el mensaje sin ninguna indentación inicial
+      final maxWidth = _consoleWidth;
+      final words = message.split(' ');
+      final List<String> lines = [];
+      String currentLine = '';
+
+      for (var word in words) {
+        final testLine = currentLine.isEmpty ? word : '$currentLine $word';
+        if (testLine.length <= maxWidth) {
+          currentLine = testLine;
+        } else {
+          lines.add(currentLine);
+          currentLine = word;
+        }
       }
-      buffer.write('$color => $message$_reset');
+      if (currentLine.isNotEmpty) {
+        lines.add(currentLine);
+      }
+
+      // Escribir todas las líneas sin espacios al inicio
+      for (var line in lines) {
+        buffer.write('$color$line\n$_reset');
+      }
+
+      buffer.write('$color${'-' * separatorLength}\n$_reset');
 
       developer.log(
         buffer.toString(),
-        name: module ?? label,
         level: _getDeveloperLevel(level),
         stackTrace: stack,
       );
     }
 
-    // Optimization: Add to queue and trigger asynchronous write
     if (_saveToFile && _logFile != null) {
-      // Memory safety: Drop logs if queue is too large
       if (_writeQueue.length >= _maxQueueSize) {
         _writeQueue.removeFirst();
       }
@@ -111,7 +139,7 @@ class FastLogger {
       final moduleStr = (module != null && module.isNotEmpty)
           ? '[$module]'
           : '[$label]';
-      var logMessage = '$timeStr $moduleStr => $message';
+      var logMessage = '$timeStr $moduleStr => $message\n';
 
       if (stack != null &&
           (level == LogLevel.error || level == LogLevel.fatal)) {
@@ -121,7 +149,6 @@ class FastLogger {
 
       _writeQueue.add(logMessage);
 
-      // Schedule background write if not already running
       if (!_isWriting) {
         _scheduleWrite();
       }
@@ -130,7 +157,6 @@ class FastLogger {
 
   void _scheduleWrite() {
     _isWriting = true;
-    // Use microtask to batch logs that occur in the same frame
     scheduleMicrotask(_processWriteQueue);
   }
 
@@ -141,17 +167,14 @@ class FastLogger {
     }
 
     try {
-      // Optimization: Batch write all currently queued logs in one I/O operation
       final buffer = StringBuffer();
       while (_writeQueue.isNotEmpty) {
         buffer.writeln(_writeQueue.removeFirst());
       }
-
       await _logFile!.writeAsString(buffer.toString(), mode: FileMode.append);
     } catch (e) {
-      // Silent on write errors to avoid recursive logging loops
+      // Silent on write errors
     } finally {
-      // If new logs arrived during the write, reschedule
       if (_writeQueue.isNotEmpty) {
         _scheduleWrite();
       } else {
@@ -187,7 +210,7 @@ class FastLogger {
       case LogLevel.success:
         return _green;
       case LogLevel.debug:
-        return _orange;
+        return _light;
       case LogLevel.info:
         return _blue;
       case LogLevel.warning:
@@ -195,7 +218,7 @@ class FastLogger {
       case LogLevel.error:
         return _red;
       case LogLevel.fatal:
-        return _magenta;
+        return _fatal;
     }
   }
 
