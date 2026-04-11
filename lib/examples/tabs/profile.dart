@@ -1,10 +1,10 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:ui/ui/components.dart';
-import 'package:ui/ui/forms.dart';
-import 'package:ui/utils/alerts.dart';
-import 'package:ui/utils/logs.dart';
+import 'package:ui/functions/ui/components.dart';
+import 'package:ui/functions/ui/forms.dart';
+import 'package:ui/functions/utils/alerts.dart';
+import 'package:ui/functions/utils/logs.dart';
 
 class ProfileExample extends StatefulWidget {
   final Map<String, dynamic>? data;

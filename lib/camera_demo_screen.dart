@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:ui/utils/files.dart';
-import 'package:ui/utils/logs.dart';
+import 'package:ui/functions/utils/files.dart';
+import 'package:ui/functions/utils/logs.dart';
 
 class CameraDemoScreen extends StatefulWidget {
   const CameraDemoScreen({super.key});

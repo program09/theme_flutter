@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ui/orm/repository/repository.dart';
 import 'package:ui/orm/example/databa_helper.dart';
 import 'package:ui/orm/example/seeder.dart';
-import 'package:ui/utils/logs.dart';
+import 'package:ui/functions/utils/logs.dart';
 import 'user.dart';
 import 'post.dart';
 import 'category.dart';

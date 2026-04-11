@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ui/ui/theme.dart';
+import 'package:ui/functions/ui/theme.dart';
 
 enum StyleAlert { solid, mica }
 

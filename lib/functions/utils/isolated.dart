@@ -4,10 +4,10 @@
 
 
 import 'package:path_provider/path_provider.dart';
-import 'package:ui/utils/env.dart';
-import 'package:ui/utils/event_bridge.dart';
-import 'package:ui/utils/logs.dart';
-import 'package:ui/utils/queue.dart';
+import 'package:ui/functions/utils/env.dart';
+import 'package:ui/functions/utils/event_bridge.dart';
+import 'package:ui/functions/utils/logs.dart';
+import 'package:ui/functions/utils/queue.dart';
 import 'package:workmanager/workmanager.dart';
 
 @pragma('vm:entry-point')

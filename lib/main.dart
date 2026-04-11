@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ui/examples/example.dart';
 import 'package:ui/orm/example/orm_demo_screen.dart';
-import 'package:ui/routers/go.dart';
-import 'package:ui/ui/theme.dart';
-import 'package:ui/utils/files.dart';
-import 'package:ui/utils/logs.dart';
+import 'package:ui/functions/routers/go.dart';
+import 'package:ui/functions/ui/theme.dart';
+import 'package:ui/functions/utils/files.dart';
+import 'package:ui/functions/utils/logs.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:ui/utils/permissions.dart';
+import 'package:ui/functions/utils/permissions.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

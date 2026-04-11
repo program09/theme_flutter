@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite_sqlcipher/sqflite.dart';
 import 'package:path/path.dart';
-import 'package:ui/utils/logs.dart';
+import 'package:ui/functions/utils/logs.dart';
 import 'database_config.dart';
 
 class DatabaseManager {

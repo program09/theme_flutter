@@ -6,9 +6,9 @@ import 'package:ui/examples/tabs/alerts.dart';
 import 'package:ui/examples/tabs/forms.dart';
 import 'package:ui/examples/tabs/profile.dart';
 import 'package:ui/main.dart';
-import 'package:ui/routers/go.dart';
-import 'package:ui/routers/go_error.dart';
-import 'package:ui/ui/forms.dart';
+import 'package:ui/functions/routers/go.dart';
+import 'package:ui/functions/routers/go_error.dart';
+import 'package:ui/functions/ui/forms.dart';
 import 'package:ui/camera_demo_screen.dart';
 
 // -------------------- USE EXAMPLE -------------------------

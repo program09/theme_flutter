@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ui/routers/go.dart';
+import 'package:ui/functions/routers/go.dart';
 
 class ErrorCode {
   static const String notFound = 'ERRX00001';

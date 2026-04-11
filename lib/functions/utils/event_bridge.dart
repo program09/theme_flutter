@@ -3,7 +3,7 @@ import 'dart:async';
 import 'dart:isolate';
 import 'dart:ui';
 
-import 'package:ui/utils/logs.dart';
+import 'package:ui/functions/utils/logs.dart';
 
 class EventBridge {
   static const String _portName = 'event_bridge_port';
