@@ -533,6 +533,68 @@ class FormsExampleState extends State<FormsExample> {
             ),
 
             const SizedBox(height: 100),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                DropUI(
+                  tooltip: 'Menú de usuario',
+                  options: [
+                    DropOption(
+                      value: 'profile',
+                      label: 'Mi Perfil',
+                      // icon: Icons.person_outline,
+                      onTap: () => lg.s(msg: 'Mi Perfil', module: 'DROP'),
+                    ),
+                    DropOption(
+                      value: 'settings',
+                      label: 'Configuración',
+                      // icon: Icons.settings_outlined,
+                      // onTap: () => lg.s(msg: 'Configuración', module: 'DROP'),
+                    ),
+                    DropOption(
+                      value: 'logout',
+                      label: 'Cerrar Sesión',
+                      icon: Icons.exit_to_app,
+                      isDestructive:
+                          true, // Esto pintará el texto y el ícono de rojo (color de error del tema)
+                    ),
+                  ],
+                  child: CircleAvatar(child: Icon(Icons.person)),
+                ),
+
+                DropUI(
+                  options: [
+                    DropOption(
+                      value: 'profile',
+                      label: 'Mi Perfil',
+                      icon: Icons.person_outline,
+                    ),
+                    DropOption(
+                      value: 'settings',
+                      label: 'Configuración',
+                      icon: Icons.settings_outlined,
+                    ),
+                    DropOption(
+                      value: 'logout',
+                      label: 'Cerrar Sesión',
+                      icon: Icons.exit_to_app,
+                      isDestructive:
+                          true, // Esto pintará el texto y el ícono de rojo (color de error del tema)
+                    ),
+                  ],
+                  onSelected: (DropOption option) {
+                    if (option.value == 'logout') {
+                      // Manejar el cierre de sesión
+                    }
+                  },
+                  child: CircleAvatar(child: Icon(Icons.person)),
+                ),
+              ],
+            ),
+
+            const SizedBox(width: 20),
+
+            const SizedBox(height: 200),
           ],
         ),
       ),

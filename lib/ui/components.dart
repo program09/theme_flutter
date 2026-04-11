@@ -830,3 +830,132 @@ Widget gridUI({
 }
 
 // end: gridUI
+
+// start: dropDownMenuUI
+
+class DropOption {
+  final String value;
+  final String label;
+  final IconData? icon;
+  final bool isDestructive;
+  final void Function()? onTap;
+
+  const DropOption({
+    required this.value,
+    required this.label,
+    this.icon,
+    this.isDestructive = false,
+    this.onTap,
+  });
+}
+
+class DropUI extends StatelessWidget {
+  final Widget child;
+  final List<DropOption> options;
+  final void Function(DropOption)? onSelected;
+  final String? tooltip;
+  final Offset offset;
+
+  const DropUI({
+    super.key,
+    required this.child,
+    required this.options,
+    this.onSelected,
+    this.tooltip,
+    this.offset = const Offset(0, 45),
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return SafeArea(
+      child: MenuAnchor(
+        style: MenuStyle(
+          backgroundColor: WidgetStatePropertyAll(theme.colorScheme.surface),
+          surfaceTintColor: const WidgetStatePropertyAll(Colors.transparent),
+          elevation: WidgetStatePropertyAll(isDark ? 0 : 2),
+          shadowColor: WidgetStatePropertyAll(
+            theme.colorScheme.shadow.withValues(alpha: .2),
+          ),
+          shape: WidgetStatePropertyAll(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+              side: BorderSide(
+                width: 1,
+                color: theme.colorScheme.outline.withValues(alpha: .5),
+              ),
+            ),
+          ),
+          padding: const WidgetStatePropertyAll(
+            EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+          ),
+        ),
+        builder:
+            (
+              BuildContext context,
+              MenuController controller,
+              Widget? childNode,
+            ) {
+              return GestureDetector(
+                onTap: () {
+                  if (controller.isOpen) {
+                    controller.close();
+                  } else {
+                    controller.open();
+                  }
+                },
+                child: tooltip != null && tooltip!.isNotEmpty
+                    ? Tooltip(message: tooltip!, child: childNode)
+                    : childNode,
+              );
+            },
+        menuChildren: options.map((DropOption option) {
+          final color = option.isDestructive
+              ? theme.colorScheme.error
+              : isDark
+              ? AppColorsDark.onSurface.withValues(alpha: .8)
+              : theme.colorScheme.onSurface;
+
+          return MenuItemButton(
+            onPressed: () {
+              option.onTap?.call();
+              onSelected?.call(option);
+            },
+            style: MenuItemButton.styleFrom(
+              splashFactory: NoSplash.splashFactory,
+              overlayColor: isDark
+                  ? AppColorsDark.background
+                  : theme.colorScheme.primary,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (option.icon != null) ...[
+                  Icon(option.icon, size: 20, color: color),
+                  const SizedBox(width: 12),
+                ],
+                Text(
+                  option.label,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: isDark ? FontWeight.w500 : FontWeight.w400,
+                    color: color,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }).toList(),
+        child: child,
+      ),
+    );
+  }
+}
+
+// end: dropDownMenuUI

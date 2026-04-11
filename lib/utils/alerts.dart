@@ -23,12 +23,12 @@ class Alerts {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
             if (type != AlertType.dark) ...[
               Icon(icon, color: Colors.white, size: 28),
               const SizedBox(width: 15),
             ],
-
             Expanded(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -124,15 +124,15 @@ class Alerts {
   static IconData _getIcon(AlertType type) {
     switch (type) {
       case AlertType.success:
-        return Icons.check_circle_rounded;
+        return Icons.check_circle_outline_rounded;
       case AlertType.error:
-        return Icons.error_rounded;
+        return Icons.error_outline_rounded;
       case AlertType.warning:
-        return Icons.warning_rounded;
+        return Icons.warning_amber_rounded;
       case AlertType.info:
-        return Icons.info_rounded;
+        return Icons.info_outline_rounded;
       case AlertType.dark:
-        return Icons.dark_mode_rounded;
+        return Icons.circle_notifications_outlined;
     }
   }
 }
